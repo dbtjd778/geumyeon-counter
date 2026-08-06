@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>금연 카운터</title>
+<link rel="stylesheet" href="style.css?v=20260806b">
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<main id="widget" class="widget">
+  <header class="top">
+    <span id="greeting">금연 중</span>
+    <span class="top-right">
+      <span id="today"></span>
+      <button id="settingsBtn" class="icon-btn" type="button" title="설정">설정</button>
+    </span>
+  </header>
+
+  <section class="counter">
+    <div class="ring-wrap">
+      <svg class="ring" viewBox="0 0 200 200">
+        <circle class="ring-bg" cx="100" cy="100" r="88" />
+        <circle id="ringFg" class="ring-fg" cx="100" cy="100" r="88" />
+      </svg>
+      <div class="ring-center">
+        <div id="dayNum" class="day-num">0</div>
+        <div class="day-unit">일째</div>
+      </div>
+    </div>
+    <p id="nextGoal" class="next-goal"></p>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">아낀 돈</div>
+      <div id="saved" class="stat-value">0원</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">안 피운 담배</div>
+      <div id="notSmoked" class="stat-value">0개비</div>
+    </div>
+  </section>
+
+  <footer class="bottom">
+    <span id="startInfo"></span>
+    <span class="bottom-btns">
+      <button id="previewBtn" type="button">축하 미리보기</button>
+      <button id="failBtn" class="danger" type="button">금연 실패</button>
+    </span>
+  </footer>
+</main>
+
+<!-- 축하 -->
+<div id="celebration" class="overlay hidden">
+  <div class="card">
+    <div id="celeBadge" class="cele-badge">10일</div>
+    <h1 id="celeTitle">축하합니다!</h1>
+    <p id="celeMsg"></p>
+    <p id="celeSub" class="sub"></p>
+    <button id="celeClose" class="primary" type="button">고마워 :)</button>
+  </div>
+</div>
+
+<!-- 설정 -->
+<div id="settings" class="overlay hidden">
+  <div class="card">
+    <h2>설정</h2>
+    <label class="field">
+      <span>금연 시작일</span>
+      <input id="startInput" type="date">
+    </label>
+    <p class="sub">시작일을 바꾸면 일수와 아낀 돈이 그 날짜 기준으로 다시 계산돼요.</p>
+    <div class="btn-row">
+      <button id="settingsCancel" type="button">취소</button>
+      <button id="settingsSave" class="primary" type="button">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 실패: 1단계 확인 -->
+<div id="failConfirm" class="overlay hidden">
+  <div class="card">
+    <h2>정말 초기화할까요?</h2>
+    <p id="failConfirmMsg"></p>
+    <p class="sub">되돌릴 수 없어요. 하지만 다시 시작하면 그만이에요.</p>
+    <div class="btn-row">
+      <button id="failCancel" type="button">아니요</button>
+      <button id="failOk" class="danger-solid" type="button">네, 초기화</button>
+    </div>
+  </div>
+</div>
+
+<!-- 실패: 2단계 재시작 -->
+<div id="failRestart" class="overlay sad hidden">
+  <div class="card sad-card">
+    <div class="sad-mark">0</div>
+    <h1>다시 0일부터</h1>
+    <p>괜찮아요. 끊으려고 했던 마음은 사라지지 않아요.</p>
+    <label class="field restart-field">
+      <span>언제 다시 시작할까요?</span>
+      <input id="restartInput" type="date">
+    </label>
+    <button id="restartSave" class="primary" type="button">다시 시작하기</button>
+  </div>
+</div>
+
+<script src="config.js?v=20260806b"></script>
+<script src="app.js?v=20260806b"></script>
+</body>
+</html>
