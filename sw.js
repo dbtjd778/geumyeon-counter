@@ -1,10 +1,16 @@
 // 오프라인에서도 열리게 하는 서비스 워커.
-// 파일을 고친 뒤에는 아래 CACHE 이름을 바꿔야 사용자에게 새 버전이 내려갑니다.
-const CACHE = 'qs-20260807a';
+//
+// HTML/JS/CSS는 '네트워크 우선'이다. 캐시 우선으로 두면 파일을 고쳐 배포해도
+// 사용자가 두 번 새로고침해야 새 화면을 보게 되기 때문. 인터넷이 없을 때만
+// 캐시로 떨어진다. 아이콘처럼 잘 안 바뀌는 파일은 캐시 우선을 유지한다.
+const CACHE = 'qs-20260807b';
 
 const ASSETS = [
   './',
   './index.html',
+  './about.html',
+  './privacy.html',
+  './contact.html',
   './style.css',
   './app.js',
   './config.js',
@@ -13,6 +19,9 @@ const ASSETS = [
   './icon-512.png',
   './icon-maskable-512.png',
 ];
+
+// 새 버전이 나왔는지 매번 확인해야 하는 것들
+const FRESH_DESTINATIONS = ['document', 'script', 'style'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -31,16 +40,29 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
+  const req = e.request;
+  if (req.method !== 'GET') return;
+
+  const wantsFresh = req.mode === 'navigate' || FRESH_DESTINATIONS.includes(req.destination);
+
+  if (wantsFresh) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => { /* 무시 */ });
+          return res;
+        })
+        .catch(() =>
+          caches.match(req, { ignoreSearch: true })
+            .then((hit) => hit || caches.match('./index.html'))
+        )
+    );
+    return;
+  }
 
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then((hit) => {
-      if (hit) return hit;
-      return fetch(e.request).catch(() => {
-        // 오프라인 상태에서 페이지 이동이면 메인 화면을 돌려준다
-        if (e.request.mode === 'navigate') return caches.match('./index.html');
-        return Response.error();
-      });
-    })
+    caches.match(req, { ignoreSearch: true })
+      .then((hit) => hit || fetch(req))
   );
 });

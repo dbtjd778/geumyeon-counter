@@ -11,9 +11,9 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260807a">
+<link rel="stylesheet" href="style.css?v=20260807b">
 </head>
-<body>
+<body class="app">
 
 <canvas id="confetti"></canvas>
 
@@ -66,6 +66,12 @@
   </footer>
 </main>
 
+<nav class="sitenav">
+  <a href="about.html">소개</a>
+  <a href="privacy.html">개인정보처리방침</a>
+  <a href="contact.html">문의</a>
+</nav>
+
 <!-- 첫 실행: 초기 설정 -->
 <div id="onboarding" class="overlay hidden">
   <div class="card">
@@ -81,8 +87,8 @@
       <div id="obGender" class="seg" data-value="">
         <button type="button" data-v="male">남성</button>
         <button type="button" data-v="female">여성</button>
-        <button type="button" data-v="">안 밝힘</button>
       </div>
+      <p class="field-note">성별에 따라 하루 평균 흡연량이 달라서, 평균과 비교해 보여드리는 데만 써요. 안 골라도 나머지 기능은 그대로 동작해요.</p>
     </div>
     <div class="field-row">
       <label class="field">
@@ -127,8 +133,8 @@
       <div id="genderInput" class="seg" data-value="">
         <button type="button" data-v="male">남성</button>
         <button type="button" data-v="female">여성</button>
-        <button type="button" data-v="">안 밝힘</button>
       </div>
+      <p class="field-note">평균 흡연량과 비교하는 데만 써요. 선택된 버튼을 다시 누르면 해제돼요.</p>
     </div>
     <div class="field-row">
       <label class="field">
@@ -179,8 +185,9 @@
   </div>
 </div>
 
-<script src="config.js?v=20260807a"></script>
-<script src="app.js?v=20260807a"></script>
+<script src="config.js?v=20260807b"></script>
+<script src="app.js?v=20260807b"></script>
 </body>
 </html>
+
 

@@ -392,12 +392,14 @@ function setSeg(id, value) {
 
 function getSeg(id) { return $(id).dataset.value || ''; }
 
+// 선택 항목이라 이미 고른 버튼을 다시 누르면 해제된다
 function initSeg(id, onChange) {
   $(id).addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-v]');
     if (!btn) return;
-    setSeg(id, btn.dataset.v);
-    if (onChange) onChange(btn.dataset.v);
+    const value = (getSeg(id) === btn.dataset.v) ? '' : btn.dataset.v;
+    setSeg(id, value);
+    if (onChange) onChange(value);
   });
 }
 
