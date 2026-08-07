@@ -1,6 +1,6 @@
 {
-  "name": "금연 카운터",
-  "short_name": "금연",
+  "name": "오늘만 하고 끊을게",
+  "short_name": "끊을게",
   "description": "금연 일수를 자동으로 세고 목표를 넘길 때마다 축하해주는 카운터",
   "lang": "ko",
   "start_url": "./",

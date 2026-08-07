@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>금연 카운터</title>
+<title>오늘만 하고 끊을게 — 금연 일수 카운터</title>
 <meta name="description" content="금연 일수를 자동으로 세고 목표를 넘길 때마다 축하해주는 카운터">
 <meta name="theme-color" content="#0f1720">
 <link rel="manifest" href="manifest.json">
@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260807c">
+<link rel="stylesheet" href="style.css?v=20260807d">
 </head>
 <body class="app">
 
@@ -76,9 +76,8 @@
 <!-- 첫 실행: 초기 설정 -->
 <div id="onboarding" class="overlay hidden">
   <div class="card">
-    <div class="cele-badge">시작하기</div>
-    <h1>금연 카운터</h1>
-    <p>딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
+    <h1>오늘만 하고 끊을게</h1>
+    <p class="sub">딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
     <label class="field">
       <span>금연 시작일</span>
       <input id="obStart" type="date">
@@ -89,7 +88,7 @@
         <button type="button" data-v="male">남성</button>
         <button type="button" data-v="female">여성</button>
       </div>
-      <p class="field-note">성별에 따라 하루 평균 흡연량이 달라서, 평균과 비교해 보여드리는 데만 써요. 안 골라도 나머지 기능은 그대로 동작해요.</p>
+      <p class="field-note">평균 흡연량과 비교하는 데만 써요. 고르면 아래 흡연량이 평균값으로 채워져요.</p>
     </div>
     <div class="field-row">
       <label class="field">
@@ -105,7 +104,7 @@
       <span>하루 흡연량 (개비)</span>
       <input id="obCigs" type="number" min="1" step="0.1" inputmode="decimal">
     </label>
-    <p class="sub">성별을 고르면 평균 흡연량이 미리 채워져요. 실제로 피우던 양을 알면 그걸 넣는 쪽이 정확해요.</p>
+    <p class="field-note">실제로 피우던 양을 알면 그걸 넣는 쪽이 정확해요.</p>
     <button id="obSave" class="primary" type="button">시작하기</button>
   </div>
 </div>
@@ -186,10 +185,13 @@
   </div>
 </div>
 
-<script src="config.js?v=20260807c"></script>
-<script src="app.js?v=20260807c"></script>
+<script src="config.js?v=20260807d"></script>
+<script src="app.js?v=20260807d"></script>
 </body>
 </html>
+
+
+
 
 
 

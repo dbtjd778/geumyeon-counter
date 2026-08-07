@@ -310,7 +310,7 @@ body.app {
 /* 입력 필드 */
 .field {
   display: block;
-  margin-top: 16px;
+  margin-top: 13px;
   text-align: left;
 }
 

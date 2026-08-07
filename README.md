@@ -1,6 +1,9 @@
-# 금연 카운터
+# 오늘만 하고 끊을게
 
 금연 일수를 자동으로 세고, 목표를 넘길 때마다 축하해주는 작은 앱.
+
+사이트: https://dbtjd778.github.io/geumyeon-counter/
+문의: geumyeon.counter@gmail.com
 
 ## 쓰는 법
 
