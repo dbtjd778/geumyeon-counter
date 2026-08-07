@@ -3,7 +3,7 @@
 // HTML/JS/CSS는 '네트워크 우선'이다. 캐시 우선으로 두면 파일을 고쳐 배포해도
 // 사용자가 두 번 새로고침해야 새 화면을 보게 되기 때문. 인터넷이 없을 때만
 // 캐시로 떨어진다. 아이콘처럼 잘 안 바뀌는 파일은 캐시 우선을 유지한다.
-const CACHE = 'qs-20260807i';
+const CACHE = 'qs-20260807j';
 
 const ASSETS = [
   './',
@@ -53,6 +53,9 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
 
+  // 폰트 CDN 같은 외부 요청은 브라우저에 맡긴다 (opaque 응답을 캐시하면 손해)
+  if (new URL(req.url).origin !== location.origin) return;
+
   const wantsFresh = req.mode === 'navigate' || FRESH_DESTINATIONS.includes(req.destination);
 
   if (wantsFresh) {
@@ -76,6 +79,7 @@ self.addEventListener('fetch', (e) => {
       .then((hit) => hit || fetch(req))
   );
 });
+
 
 
 

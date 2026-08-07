@@ -211,7 +211,6 @@ function renderResult(type) {
 
   $('resultEmoji').textContent = c.emoji;
   $('resultName').textContent = c.name;
-  $('resultMbti').textContent = type;
   $('resultDesc').textContent = c.desc;
 
   const tagBox = $('resultTags');
