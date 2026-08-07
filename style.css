@@ -338,6 +338,46 @@ body[data-mode="drink"] .only-smoke { display: none; }
   color: #5f7280;
 }
 
+/* 금주 탭에서 통계 아래에 붙는 심리테스트 배너 (통계 두 칸과 같은 폭) */
+.test-promo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 14px;
+  border: 1px solid rgba(34, 211, 238, 0.32);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(34, 211, 238, 0.13), rgba(74, 222, 128, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.test-promo.hidden { display: none; }
+
+.test-promo:hover { border-color: rgba(34, 211, 238, 0.6); transform: translateY(-1px); }
+
+.test-promo-emoji { font-size: 22px; line-height: 1; flex: 0 0 auto; }
+
+.test-promo-text { flex: 1; min-width: 0; display: block; }
+
+.test-promo-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.test-promo-text em {
+  display: block;
+  margin-top: 1px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.test-promo-go { flex: 0 0 auto; font-size: 15px; color: var(--accent-2); }
+
 /* ===== 하단 ===== */
 .bottom {
   display: flex;

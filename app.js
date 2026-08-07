@@ -192,6 +192,8 @@ function applyModeLabels() {
   // 아래 메뉴의 정보 링크도 탭에 맞춰 바뀐다
   $('guideLink').href = m.guideHref;
   $('guideLink').textContent = m.guideLabel;
+  // 심리테스트는 술자리 이야기라 금주 탭에서만 권한다
+  $('testPromo').classList.toggle('hidden', mode !== 'drink');
   document.body.dataset.mode = mode;
   setSeg('modeTabs', mode);
 }
