@@ -497,6 +497,45 @@ body.app {
 
 .notice p:last-child { margin-bottom: 0; }
 
+/* 글 목록 카드 */
+.card-list {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 34px;
+}
+
+.post-card {
+  display: block;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.post-card:hover {
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.post-card h2 {
+  margin: 0 0 7px;
+  padding-top: 0;
+  font-size: 17px;
+  color: var(--text);
+}
+
+.post-card p { margin: 0; font-size: 13.5px; line-height: 1.65; }
+
+.post-more {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 .contact-mail {
   font-size: 17px;
   font-weight: 600;
