@@ -1,13 +1,44 @@
 'use strict';
 
+// ===== 모드 (금연 / 금주) =====
+// 두 탭은 계산 방식과 화면 문구만 다르고 나머지 구조는 같다.
+
+const MODES = {
+  smoke: {
+    id: 'smoke',
+    verb: '금연',
+    startLabel: '금연 시작일',
+    countLabel: '안 피운 담배',
+    failLabel: '금연 실패',
+    // 하루에 아끼는 돈
+    moneyPerDay: () => (getNum('cigsPerDay', CONFIG.cigsPerDay) / 20) * getNum('pricePerPack', CONFIG.pricePerPack),
+    // 하루에 줄어드는 개수와 그 단위
+    countPerDay: () => getNum('cigsPerDay', CONFIG.cigsPerDay),
+    countUnit: '개비',
+    countText: (total) => comma(total) + '개비',
+    celebrateText: (total) => `담배 ${comma(total)}개비를 피우지 않았어요.`,
+  },
+  drink: {
+    id: 'drink',
+    verb: '금주',
+    startLabel: '금주 시작일',
+    countLabel: '안 마신 술자리',
+    failLabel: '금주 실패',
+    moneyPerDay: () => (getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7) * getNum('costPerDrink', CONFIG.costPerDrink),
+    countPerDay: () => getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7,
+    countUnit: '번',
+    countText: (total) => comma(Math.round(total)) + '번',
+    celebrateText: (total) => `술자리 ${comma(Math.round(total))}번을 넘겼어요.`,
+  },
+};
+
+let mode = 'smoke';
+
+function M() { return MODES[mode]; }
+
 // ===== 저장소 (localStorage를 못 쓰는 환경에서도 죽지 않게) =====
 
-const KEY_START = 'qs.startDate';
-const KEY_PRICE = 'qs.pricePerPack';
-const KEY_CIGS = 'qs.cigsPerDay';
-const KEY_GENDER = 'qs.gender';
-const KEY_AGE = 'qs.age';
-const KEY_CELEBRATED = 'qs.celebrated';
+const KEY_MODE = 'qs.mode';
 
 function readStore(key) {
   try { return window.localStorage.getItem(key); } catch (e) { return null; }
@@ -15,6 +46,34 @@ function readStore(key) {
 
 function writeStore(key, value) {
   try { window.localStorage.setItem(key, value); return true; } catch (e) { return false; }
+}
+
+// 모드별로 키를 나눠 쓴다. 예: qs.smoke.startDate / qs.drink.startDate
+function k(name) { return `qs.${mode}.${name}`; }
+
+function get(name) { return readStore(k(name)); }
+function set(name, value) { return writeStore(k(name), value); }
+
+function getNum(name, fallback) {
+  const v = Number(get(name));
+  return v > 0 ? v : fallback;
+}
+
+// 모드 구분이 없던 시절(qs.startDate 등)의 값을 금연 쪽으로 옮긴다
+function migrateOldKeys() {
+  if (readStore('qs.smoke.startDate') || !readStore('qs.startDate')) return;
+  const pairs = [
+    ['qs.startDate', 'qs.smoke.startDate'],
+    ['qs.pricePerPack', 'qs.smoke.pricePerPack'],
+    ['qs.cigsPerDay', 'qs.smoke.cigsPerDay'],
+    ['qs.gender', 'qs.smoke.gender'],
+    ['qs.age', 'qs.smoke.age'],
+    ['qs.celebrated', 'qs.smoke.celebrated'],
+  ];
+  for (const [from, to] of pairs) {
+    const v = readStore(from);
+    if (v !== null) writeStore(to, v);
+  }
 }
 
 // ===== 날짜 계산 =====
@@ -36,59 +95,8 @@ function toInputValue(d) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-// ===== 설정값 =====
-
-function getStartDate() {
-  return parseDate(readStore(KEY_START));
-}
-
-function setStartDate(d) {
-  writeStore(KEY_START, toInputValue(d));
-}
-
-function getPricePerPack() {
-  const v = Number(readStore(KEY_PRICE));
-  return v > 0 ? v : CONFIG.pricePerPack;
-}
-
-function getCigsPerDay() {
-  const v = Number(readStore(KEY_CIGS));
-  return v > 0 ? v : CONFIG.cigsPerDay;
-}
-
-function moneyPerDay() {
-  return (getCigsPerDay() / 20) * getPricePerPack();
-}
-
-// 'male' | 'female' | '' (안 밝힘)
-function getGender() {
-  const v = readStore(KEY_GENDER);
-  return (v === 'male' || v === 'female') ? v : '';
-}
-
-// 나이는 선택 항목이라 없으면 null
-function getAge() {
-  const v = Number(readStore(KEY_AGE));
-  return (v > 0 && v < 130) ? Math.floor(v) : null;
-}
-
-// 성별에 해당하는 하루 평균 흡연량 (개비). 안 밝혔으면 null
-function averageCigsFor(gender) {
-  const table = CONFIG.averageCigs || {};
-  return table[gender] > 0 ? table[gender] : null;
-}
-
-// 금연으로 되찾는 기대수명. 근거 수치가 있는 연령대만 숫자를 돌려준다.
-function lifeGainedFor(age) {
-  if (age === null) return null;
-  const hit = (CONFIG.lifeGained || []).find((r) => age >= r.min && age <= r.max);
-  return hit ? hit.years : null;
-}
-
-// 소수점이 있을 때만 한 자리까지 보여준다 (13.4 → "13.4", 20 → "20")
-function trim1(n) {
-  return (Math.round(n * 10) / 10).toString();
-}
+function getStartDate() { return parseDate(get('startDate')); }
+function setStartDate(d) { set('startDate', toInputValue(d)); }
 
 // 시작일이 1일차. 시작일이 아직 안 왔으면 0 이하가 나온다.
 function currentDay() {
@@ -104,6 +112,38 @@ function formatDate(d) {
 
 function comma(n) {
   return Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// 소수점이 있을 때만 한 자리까지 보여준다 (13.4 → "13.4", 20 → "20")
+function trim1(n) {
+  return (Math.round(n * 10) / 10).toString();
+}
+
+// ===== 금연 전용: 성별·나이 =====
+
+// 'male' | 'female' | '' (안 고름)
+function getGender() {
+  const v = get('gender');
+  return (v === 'male' || v === 'female') ? v : '';
+}
+
+// 나이는 선택 항목이라 없으면 null
+function getAge() {
+  const v = Number(get('age'));
+  return (v > 0 && v < 130) ? Math.floor(v) : null;
+}
+
+// 성별에 해당하는 하루 평균 흡연량 (개비). 안 골랐으면 null
+function averageCigsFor(gender) {
+  const table = CONFIG.averageCigs || {};
+  return table[gender] > 0 ? table[gender] : null;
+}
+
+// 금연으로 되찾는 기대수명. 근거 수치가 있는 연령대만 숫자를 돌려준다.
+function lifeGainedFor(age) {
+  if (age === null) return null;
+  const hit = (CONFIG.lifeGained || []).find((r) => age >= r.min && age <= r.max);
+  return hit ? hit.years : null;
 }
 
 // ===== 마일스톤 =====
@@ -127,12 +167,22 @@ const $ = (id) => document.getElementById(id);
 
 let renderedDay = null;
 
+// 모드에 따라 달라지는 문구를 한 번에 갈아끼운다
+function applyModeLabels() {
+  const m = M();
+  $('countLabel').textContent = m.countLabel;
+  $('failBtn').textContent = m.failLabel;
+  $('obStartLabel').textContent = m.startLabel;
+  $('startInputLabel').textContent = m.startLabel;
+  $('settingsTitle').textContent = m.verb + ' 설정';
+  document.body.dataset.mode = mode;
+  setSeg('modeTabs', mode);
+}
+
 function render() {
   const day = currentDay();
   renderedDay = day;
 
-  const nick = (CONFIG.nickname || '').trim();
-  $('greeting').textContent = nick ? `${nick}님, 금연 중` : '금연 중';
   $('today').textContent = formatDate(new Date());
 
   if (day <= 0) {
@@ -158,9 +208,8 @@ function render() {
   ring.style.strokeDasharray = String(circumference);
   ring.style.strokeDashoffset = String(circumference * (1 - ratio));
 
-  // 절약 금액 / 안 피운 담배
-  $('saved').textContent = comma(shown * moneyPerDay()) + '원';
-  $('notSmoked').textContent = comma(shown * getCigsPerDay()) + '개비';
+  $('saved').textContent = comma(shown * M().moneyPerDay()) + '원';
+  $('notSmoked').textContent = M().countText(shown * M().countPerDay());
 
   const start = getStartDate();
   $('startInfo').textContent = start
@@ -170,17 +219,23 @@ function render() {
   renderInsight();
 }
 
-// 성별·나이를 넣은 사람에게만 보여주는 추가 정보
+// 금연 탭에서 성별·나이를 넣은 사람에게만 보여주는 추가 정보
 function renderInsight() {
   const avgEl = $('insightAvg');
   const lifeEl = $('insightLife');
   const srcEl = $('insightSource');
+
+  if (mode !== 'smoke') {
+    $('insight').classList.add('hidden');
+    return;
+  }
+
   const sources = [];
 
   // 같은 성별 평균과 비교
   const avg = averageCigsFor(getGender());
   if (avg !== null) {
-    const mine = getCigsPerDay();
+    const mine = getNum('cigsPerDay', CONFIG.cigsPerDay);
     const diff = mine - avg;
     const avgText = `같은 성별 평균 <strong>하루 ${trim1(avg)}개비</strong>`;
     if (diff > 0.05) {
@@ -230,12 +285,12 @@ function renderInsight() {
 
 function showCelebration(day) {
   const msg = (CONFIG.milestoneMessages || {})[day] || `${day}일 달성`;
+  const m = M();
 
   $('celeBadge').textContent = `${comma(day)}일`;
   $('celeMsg').textContent = msg;
   $('celeSub').textContent =
-    `지금까지 ${comma(day * moneyPerDay())}원을 아꼈고, ` +
-    `담배 ${comma(day * getCigsPerDay())}개비를 피우지 않았어요.`;
+    `지금까지 ${comma(day * m.moneyPerDay())}원을 아꼈고, ` + m.celebrateText(day * m.countPerDay());
 
   $('celebration').classList.remove('hidden');
   particles.confetti(160);
@@ -248,14 +303,14 @@ function checkMilestone() {
   const day = currentDay();
   if (day <= 0) return;
   if (!sortedMilestones().includes(day)) return;
-  if (readStore(KEY_CELEBRATED) === String(day)) return;
-  writeStore(KEY_CELEBRATED, String(day));
+  if (get('celebrated') === String(day)) return;
+  set('celebrated', String(day));
   showCelebration(day);
 }
 
 // 시작일을 바꾼 직후에 축하가 튀어나오지 않도록 눌러둔다
 function suppressTodayCelebration() {
-  writeStore(KEY_CELEBRATED, String(currentDay()));
+  set('celebrated', String(currentDay()));
 }
 
 // ===== 파티클 (축하 색종이 / 실패 잿가루) =====
@@ -375,12 +430,10 @@ const particles = (function () {
   return { confetti, ashOn, ashOff };
 })();
 
-// ===== 오버레이 제어 =====
+// ===== 오버레이 / 버튼 그룹 =====
 
 function openOverlay(id) { $(id).classList.remove('hidden'); }
 function closeOverlay(id) { $(id).classList.add('hidden'); }
-
-// ===== 성별 선택 버튼 =====
 
 function setSeg(id, value) {
   const box = $(id);
@@ -393,65 +446,87 @@ function setSeg(id, value) {
 function getSeg(id) { return $(id).dataset.value || ''; }
 
 // 선택 항목이라 이미 고른 버튼을 다시 누르면 해제된다
-function initSeg(id, onChange) {
+function initSeg(id, onChange, allowToggleOff) {
   $(id).addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-v]');
     if (!btn) return;
-    const value = (getSeg(id) === btn.dataset.v) ? '' : btn.dataset.v;
+    const same = getSeg(id) === btn.dataset.v;
+    if (same && !allowToggleOff) return;
+    const value = same ? '' : btn.dataset.v;
     setSeg(id, value);
     if (onChange) onChange(value);
   });
 }
 
+// ===== 첫 설정 / 설정 =====
+
 // 첫 설정에서는 성별을 고르면 평균 흡연량을 미리 채워준다
 initSeg('obGender', (v) => {
   const avg = averageCigsFor(v);
   if (avg !== null) $('obCigs').value = String(avg);
-});
+}, true);
 
 // 설정 화면에서는 이미 넣어둔 값을 함부로 덮어쓰지 않는다
-initSeg('genderInput');
+initSeg('genderInput', null, true);
+
+// 탭은 항상 하나가 선택되어 있어야 하므로 해제를 막는다
+initSeg('modeTabs', (v) => { if (v) switchMode(v); }, false);
 
 // 성별·나이를 저장한다 (빈 값이면 지운다)
 function saveProfile(gender, ageText) {
-  writeStore(KEY_GENDER, gender);
+  set('gender', gender);
   const age = Number(ageText);
-  writeStore(KEY_AGE, (age > 0 && age < 130) ? String(Math.floor(age)) : '');
+  set('age', (age > 0 && age < 130) ? String(Math.floor(age)) : '');
 }
 
-// 첫 실행 설정
+function fillOnboarding() {
+  $('obStart').value = toInputValue(new Date());
+  $('obPrice').value = String(CONFIG.pricePerPack);
+  $('obCigs').value = String(CONFIG.cigsPerDay);
+  $('obAge').value = '';
+  setSeg('obGender', '');
+  $('obFreq').value = String(CONFIG.drinksPerWeek);
+  $('obCost').value = String(CONFIG.costPerDrink);
+}
+
 $('obSave').addEventListener('click', () => {
   const d = parseDate($('obStart').value);
   if (!d) { $('obStart').focus(); return; }
-  const price = Number($('obPrice').value);
-  const cigs = Number($('obCigs').value);
-  if (!(price >= 0)) { $('obPrice').focus(); return; }
-  if (!(cigs > 0)) { $('obCigs').focus(); return; }
+
+  if (mode === 'smoke') {
+    const price = Number($('obPrice').value);
+    const cigs = Number($('obCigs').value);
+    if (!(price >= 0)) { $('obPrice').focus(); return; }
+    if (!(cigs > 0)) { $('obCigs').focus(); return; }
+    set('pricePerPack', String(price));
+    set('cigsPerDay', String(cigs));
+    saveProfile(getSeg('obGender'), $('obAge').value);
+  } else {
+    const freq = Number($('obFreq').value);
+    const cost = Number($('obCost').value);
+    if (!(freq > 0)) { $('obFreq').focus(); return; }
+    if (!(cost >= 0)) { $('obCost').focus(); return; }
+    set('drinksPerWeek', String(freq));
+    set('costPerDrink', String(cost));
+  }
 
   setStartDate(d);
-  writeStore(KEY_PRICE, String(price));
-  writeStore(KEY_CIGS, String(cigs));
-  saveProfile(getSeg('obGender'), $('obAge').value);
   closeOverlay('onboarding');
   render();
   checkMilestone();
 });
 
-// 축하
-$('celeClose').addEventListener('click', () => closeOverlay('celebration'));
-
-$('previewBtn').addEventListener('click', () => {
-  const day = currentDay();
-  showCelebration(day > 0 ? (nextMilestone(day - 1) || day) : 1);
-});
-
-// 설정
 $('settingsBtn').addEventListener('click', () => {
   $('startInput').value = toInputValue(getStartDate() || new Date());
-  $('priceInput').value = String(getPricePerPack());
-  $('cigsInput').value = String(getCigsPerDay());
-  setSeg('genderInput', getGender());
-  $('ageInput').value = getAge() === null ? '' : String(getAge());
+  if (mode === 'smoke') {
+    $('priceInput').value = String(getNum('pricePerPack', CONFIG.pricePerPack));
+    $('cigsInput').value = String(getNum('cigsPerDay', CONFIG.cigsPerDay));
+    setSeg('genderInput', getGender());
+    $('ageInput').value = getAge() === null ? '' : String(getAge());
+  } else {
+    $('freqInput').value = String(getNum('drinksPerWeek', CONFIG.drinksPerWeek));
+    $('costInput').value = String(getNum('costPerDrink', CONFIG.costPerDrink));
+  }
   openOverlay('settings');
 });
 
@@ -460,26 +535,44 @@ $('settingsCancel').addEventListener('click', () => closeOverlay('settings'));
 $('settingsSave').addEventListener('click', () => {
   const d = parseDate($('startInput').value);
   if (!d) { $('startInput').focus(); return; }
-  const price = Number($('priceInput').value);
-  const cigs = Number($('cigsInput').value);
-  if (!(price >= 0)) { $('priceInput').focus(); return; }
-  if (!(cigs > 0)) { $('cigsInput').focus(); return; }
+
+  if (mode === 'smoke') {
+    const price = Number($('priceInput').value);
+    const cigs = Number($('cigsInput').value);
+    if (!(price >= 0)) { $('priceInput').focus(); return; }
+    if (!(cigs > 0)) { $('cigsInput').focus(); return; }
+    set('pricePerPack', String(price));
+    set('cigsPerDay', String(cigs));
+    saveProfile(getSeg('genderInput'), $('ageInput').value);
+  } else {
+    const freq = Number($('freqInput').value);
+    const cost = Number($('costInput').value);
+    if (!(freq > 0)) { $('freqInput').focus(); return; }
+    if (!(cost >= 0)) { $('costInput').focus(); return; }
+    set('drinksPerWeek', String(freq));
+    set('costPerDrink', String(cost));
+  }
 
   setStartDate(d);
-  writeStore(KEY_PRICE, String(price));
-  writeStore(KEY_CIGS, String(cigs));
-  saveProfile(getSeg('genderInput'), $('ageInput').value);
   suppressTodayCelebration();
   closeOverlay('settings');
   render();
 });
 
-// 실패 → 확인
+// ===== 축하 / 실패 =====
+
+$('celeClose').addEventListener('click', () => closeOverlay('celebration'));
+
+$('previewBtn').addEventListener('click', () => {
+  const day = currentDay();
+  showCelebration(day > 0 ? (nextMilestone(day - 1) || day) : 1);
+});
+
 $('failBtn').addEventListener('click', () => {
   const day = Math.max(currentDay(), 0);
   $('failConfirmMsg').textContent =
     day > 0
-      ? `지금까지 쌓은 ${comma(day)}일과 ${comma(day * moneyPerDay())}원 기록이 사라지고 처음부터 다시 시작해요.`
+      ? `지금까지 쌓은 ${comma(day)}일과 ${comma(day * M().moneyPerDay())}원 기록이 사라지고 처음부터 다시 시작해요.`
       : '기록을 처음부터 다시 설정해요.';
   openOverlay('failConfirm');
 });
@@ -495,7 +588,6 @@ $('failOk').addEventListener('click', () => {
   particles.ashOn();
 });
 
-// 재시작
 $('restartSave').addEventListener('click', () => {
   const d = parseDate($('restartInput').value);
   if (!d) { $('restartInput').focus(); return; }
@@ -507,17 +599,46 @@ $('restartSave').addEventListener('click', () => {
   render();
 });
 
+// ===== 탭 전환 =====
+
+function switchMode(next) {
+  if (!MODES[next] || next === mode) return;
+  mode = next;
+  writeStore(KEY_MODE, mode);
+
+  // 열려 있던 화면은 모두 닫고 새 모드 기준으로 다시 그린다
+  for (const id of ['celebration', 'settings', 'failConfirm', 'failRestart', 'onboarding']) {
+    closeOverlay(id);
+  }
+  particles.ashOff();
+  $('widget').classList.remove('grieving');
+
+  applyModeLabels();
+  render();
+
+  if (getStartDate()) {
+    checkMilestone();
+  } else {
+    fillOnboarding();
+    openOverlay('onboarding');
+  }
+}
+
 // ===== 시작 =====
 
+migrateOldKeys();
+
+const savedMode = readStore(KEY_MODE);
+if (MODES[savedMode]) mode = savedMode;
+
+applyModeLabels();
 render();
 
 if (getStartDate()) {
   setTimeout(checkMilestone, 600);
 } else {
   // 처음 여는 사람에게는 설정부터 묻는다
-  $('obStart').value = toInputValue(new Date());
-  $('obPrice').value = String(CONFIG.pricePerPack);
-  $('obCigs').value = String(CONFIG.cigsPerDay);
+  fillOnboarding();
   openOverlay('onboarding');
 }
 

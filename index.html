@@ -1,17 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>오늘만 하고 끊을게 — 금연 일수 카운터</title>
-<meta name="description" content="금연 일수를 자동으로 세고 목표를 넘길 때마다 축하해주는 카운터">
+<title>오늘만 하고 끊을게 — 금연·금주 일수 카운터</title>
+<meta name="description" content="금연과 금주 일수를 자동으로 세고, 목표를 넘길 때마다 축하해주는 카운터">
 <meta name="theme-color" content="#0f1720">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260807e">
+<link rel="stylesheet" href="style.css?v=20260807f">
 </head>
 <body class="app">
 
@@ -19,7 +19,10 @@
 
 <main id="widget" class="widget">
   <header class="top">
-    <span id="greeting">금연 중</span>
+    <div id="modeTabs" class="tabs" data-value="smoke">
+      <button type="button" data-v="smoke">금연</button>
+      <button type="button" data-v="drink">금주</button>
+    </div>
     <span class="top-right">
       <span id="today"></span>
       <button id="settingsBtn" class="icon-btn" type="button" title="설정">설정</button>
@@ -46,7 +49,7 @@
       <div id="saved" class="stat-value">0원</div>
     </div>
     <div class="stat">
-      <div class="stat-label">안 피운 담배</div>
+      <div id="countLabel" class="stat-label">안 피운 담배</div>
       <div id="notSmoked" class="stat-value">0개비</div>
     </div>
   </section>
@@ -77,34 +80,53 @@
 <div id="onboarding" class="overlay hidden">
   <div class="card">
     <h1>오늘만 하고 끊을게</h1>
-    <p class="sub">딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
+    <p id="obLead" class="sub">딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
+
     <label class="field">
-      <span>금연 시작일</span>
+      <span id="obStartLabel">금연 시작일</span>
       <input id="obStart" type="date">
     </label>
-    <div class="field">
-      <span>성별 <em>선택</em></span>
-      <div id="obGender" class="seg" data-value="">
-        <button type="button" data-v="male">남성</button>
-        <button type="button" data-v="female">여성</button>
+
+    <div class="only-smoke">
+      <div class="field">
+        <span>성별 <em>선택</em></span>
+        <div id="obGender" class="seg" data-value="">
+          <button type="button" data-v="male">남성</button>
+          <button type="button" data-v="female">여성</button>
+        </div>
+        <p class="field-note">평균 흡연량과 비교하는 데만 써요. 고르면 아래 흡연량이 평균값으로 채워져요.</p>
       </div>
-      <p class="field-note">평균 흡연량과 비교하는 데만 써요. 고르면 아래 흡연량이 평균값으로 채워져요.</p>
-    </div>
-    <div class="field-row">
+      <div class="field-row">
+        <label class="field">
+          <span>나이 <em>선택</em></span>
+          <input id="obAge" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
+        </label>
+        <label class="field">
+          <span>한 갑 가격 (원)</span>
+          <input id="obPrice" type="number" min="0" step="100" inputmode="numeric">
+        </label>
+      </div>
       <label class="field">
-        <span>나이 <em>선택</em></span>
-        <input id="obAge" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
+        <span>하루 흡연량 (개비)</span>
+        <input id="obCigs" type="number" min="1" step="0.1" inputmode="decimal">
       </label>
-      <label class="field">
-        <span>한 갑 가격 (원)</span>
-        <input id="obPrice" type="number" min="0" step="100" inputmode="numeric">
-      </label>
+      <p class="field-note">실제로 피우던 양을 알면 그걸 넣는 쪽이 정확해요.</p>
     </div>
-    <label class="field">
-      <span>하루 흡연량 (개비)</span>
-      <input id="obCigs" type="number" min="1" step="0.1" inputmode="decimal">
-    </label>
-    <p class="field-note">실제로 피우던 양을 알면 그걸 넣는 쪽이 정확해요.</p>
+
+    <div class="only-drink">
+      <div class="field-row">
+        <label class="field">
+          <span>일주일에 몇 번</span>
+          <input id="obFreq" type="number" min="0.5" max="21" step="0.5" inputmode="decimal">
+        </label>
+        <label class="field">
+          <span>한 번에 쓰던 돈 (원)</span>
+          <input id="obCost" type="number" min="0" step="1000" inputmode="numeric">
+        </label>
+      </div>
+      <p class="field-note">끊기 전에 보통 어땠는지를 넣어주세요. 술값에 안주와 택시비까지 넣으면 실제 절약액에 가까워져요.</p>
+    </div>
+
     <button id="obSave" class="primary" type="button">시작하기</button>
   </div>
 </div>
@@ -123,33 +145,51 @@
 <!-- 설정 -->
 <div id="settings" class="overlay hidden">
   <div class="card">
-    <h2>설정</h2>
+    <h2 id="settingsTitle">금연 설정</h2>
+
     <label class="field">
-      <span>금연 시작일</span>
+      <span id="startInputLabel">금연 시작일</span>
       <input id="startInput" type="date">
     </label>
-    <div class="field">
-      <span>성별 <em>선택</em></span>
-      <div id="genderInput" class="seg" data-value="">
-        <button type="button" data-v="male">남성</button>
-        <button type="button" data-v="female">여성</button>
+
+    <div class="only-smoke">
+      <div class="field">
+        <span>성별 <em>선택</em></span>
+        <div id="genderInput" class="seg" data-value="">
+          <button type="button" data-v="male">남성</button>
+          <button type="button" data-v="female">여성</button>
+        </div>
+        <p class="field-note">평균 흡연량과 비교하는 데만 써요. 선택된 버튼을 다시 누르면 해제돼요.</p>
       </div>
-      <p class="field-note">평균 흡연량과 비교하는 데만 써요. 선택된 버튼을 다시 누르면 해제돼요.</p>
-    </div>
-    <div class="field-row">
+      <div class="field-row">
+        <label class="field">
+          <span>나이 <em>선택</em></span>
+          <input id="ageInput" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
+        </label>
+        <label class="field">
+          <span>한 갑 가격 (원)</span>
+          <input id="priceInput" type="number" min="0" step="100" inputmode="numeric">
+        </label>
+      </div>
       <label class="field">
-        <span>나이 <em>선택</em></span>
-        <input id="ageInput" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
-      </label>
-      <label class="field">
-        <span>한 갑 가격 (원)</span>
-        <input id="priceInput" type="number" min="0" step="100" inputmode="numeric">
+        <span>하루 흡연량 (개비)</span>
+        <input id="cigsInput" type="number" min="1" step="0.1" inputmode="decimal">
       </label>
     </div>
-    <label class="field">
-      <span>하루 흡연량 (개비)</span>
-      <input id="cigsInput" type="number" min="1" step="0.1" inputmode="decimal">
-    </label>
+
+    <div class="only-drink">
+      <div class="field-row">
+        <label class="field">
+          <span>일주일에 몇 번</span>
+          <input id="freqInput" type="number" min="0.5" max="21" step="0.5" inputmode="decimal">
+        </label>
+        <label class="field">
+          <span>한 번에 쓰던 돈 (원)</span>
+          <input id="costInput" type="number" min="0" step="1000" inputmode="numeric">
+        </label>
+      </div>
+    </div>
+
     <p class="sub">설정은 이 브라우저에만 저장되고 어디로도 전송되지 않아요.</p>
     <div class="btn-row">
       <button id="settingsCancel" type="button">취소</button>
@@ -176,7 +216,7 @@
   <div class="card sad-card">
     <div class="sad-mark">0</div>
     <h1>다시 0일부터</h1>
-    <p>괜찮아요. 끊으려고 했던 마음은 사라지지 않아요.</p>
+    <p id="failRestartMsg">괜찮아요. 끊으려고 했던 마음은 사라지지 않아요.</p>
     <label class="field restart-field">
       <span>언제 다시 시작할까요?</span>
       <input id="restartInput" type="date">
@@ -185,14 +225,7 @@
   </div>
 </div>
 
-<script src="config.js?v=20260807e"></script>
-<script src="app.js?v=20260807e"></script>
+<script src="config.js?v=20260807f"></script>
+<script src="app.js?v=20260807f"></script>
 </body>
 </html>
-
-
-
-
-
-
-
