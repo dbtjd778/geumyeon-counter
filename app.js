@@ -3,6 +3,8 @@
 // ===== 저장소 (localStorage를 못 쓰는 환경에서도 죽지 않게) =====
 
 const KEY_START = 'qs.startDate';
+const KEY_PRICE = 'qs.pricePerPack';
+const KEY_CIGS = 'qs.cigsPerDay';
 const KEY_CELEBRATED = 'qs.celebrated';
 
 function readStore(key) {
@@ -32,13 +34,28 @@ function toInputValue(d) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-// 저장된 시작일이 있으면 그걸, 없으면 config.js의 값을 쓴다
+// ===== 설정값 =====
+
 function getStartDate() {
-  return parseDate(readStore(KEY_START)) || parseDate(CONFIG.startDate);
+  return parseDate(readStore(KEY_START));
 }
 
 function setStartDate(d) {
   writeStore(KEY_START, toInputValue(d));
+}
+
+function getPricePerPack() {
+  const v = Number(readStore(KEY_PRICE));
+  return v > 0 ? v : CONFIG.pricePerPack;
+}
+
+function getCigsPerDay() {
+  const v = Number(readStore(KEY_CIGS));
+  return v > 0 ? v : CONFIG.cigsPerDay;
+}
+
+function moneyPerDay() {
+  return (getCigsPerDay() / 20) * getPricePerPack();
 }
 
 // 시작일이 1일차. 시작일이 아직 안 왔으면 0 이하가 나온다.
@@ -55,10 +72,6 @@ function formatDate(d) {
 
 function comma(n) {
   return Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-function moneyPerDay() {
-  return (CONFIG.cigsPerDay / 20) * CONFIG.pricePerPack;
 }
 
 // ===== 마일스톤 =====
@@ -92,7 +105,9 @@ function render() {
 
   if (day <= 0) {
     $('dayNum').textContent = '0';
-    $('nextGoal').innerHTML = `<strong>${1 - day}일</strong> 뒤에 시작해요`;
+    $('nextGoal').innerHTML = getStartDate()
+      ? `<strong>${1 - day}일</strong> 뒤에 시작해요`
+      : '시작일을 설정해 주세요';
   } else {
     $('dayNum').textContent = comma(day);
     const next = nextMilestone(day);
@@ -113,12 +128,12 @@ function render() {
 
   // 절약 금액 / 안 피운 담배
   $('saved').textContent = comma(shown * moneyPerDay()) + '원';
-  $('notSmoked').textContent = comma(shown * CONFIG.cigsPerDay) + '개비';
+  $('notSmoked').textContent = comma(shown * getCigsPerDay()) + '개비';
 
   const start = getStartDate();
   $('startInfo').textContent = start
     ? `시작 ${start.getFullYear()}.${start.getMonth() + 1}.${start.getDate()}`
-    : '시작일 설정 필요';
+    : '시작일 미설정';
 }
 
 // ===== 축하 =====
@@ -130,7 +145,7 @@ function showCelebration(day) {
   $('celeMsg').textContent = msg;
   $('celeSub').textContent =
     `지금까지 ${comma(day * moneyPerDay())}원을 아꼈고, ` +
-    `담배 ${comma(day * CONFIG.cigsPerDay)}개비를 피우지 않았어요.`;
+    `담배 ${comma(day * getCigsPerDay())}개비를 피우지 않았어요.`;
 
   $('celebration').classList.remove('hidden');
   particles.confetti(160);
@@ -275,6 +290,23 @@ const particles = (function () {
 function openOverlay(id) { $(id).classList.remove('hidden'); }
 function closeOverlay(id) { $(id).classList.add('hidden'); }
 
+// 첫 실행 설정
+$('obSave').addEventListener('click', () => {
+  const d = parseDate($('obStart').value);
+  if (!d) { $('obStart').focus(); return; }
+  const price = Number($('obPrice').value);
+  const cigs = Number($('obCigs').value);
+  if (!(price >= 0)) { $('obPrice').focus(); return; }
+  if (!(cigs > 0)) { $('obCigs').focus(); return; }
+
+  setStartDate(d);
+  writeStore(KEY_PRICE, String(price));
+  writeStore(KEY_CIGS, String(cigs));
+  closeOverlay('onboarding');
+  render();
+  checkMilestone();
+});
+
 // 축하
 $('celeClose').addEventListener('click', () => closeOverlay('celebration'));
 
@@ -285,8 +317,9 @@ $('previewBtn').addEventListener('click', () => {
 
 // 설정
 $('settingsBtn').addEventListener('click', () => {
-  const start = getStartDate();
-  $('startInput').value = toInputValue(start || new Date());
+  $('startInput').value = toInputValue(getStartDate() || new Date());
+  $('priceInput').value = String(getPricePerPack());
+  $('cigsInput').value = String(getCigsPerDay());
   openOverlay('settings');
 });
 
@@ -295,7 +328,14 @@ $('settingsCancel').addEventListener('click', () => closeOverlay('settings'));
 $('settingsSave').addEventListener('click', () => {
   const d = parseDate($('startInput').value);
   if (!d) { $('startInput').focus(); return; }
+  const price = Number($('priceInput').value);
+  const cigs = Number($('cigsInput').value);
+  if (!(price >= 0)) { $('priceInput').focus(); return; }
+  if (!(cigs > 0)) { $('cigsInput').focus(); return; }
+
   setStartDate(d);
+  writeStore(KEY_PRICE, String(price));
+  writeStore(KEY_CIGS, String(cigs));
   suppressTodayCelebration();
   closeOverlay('settings');
   render();
@@ -337,7 +377,16 @@ $('restartSave').addEventListener('click', () => {
 // ===== 시작 =====
 
 render();
-setTimeout(checkMilestone, 600);
+
+if (getStartDate()) {
+  setTimeout(checkMilestone, 600);
+} else {
+  // 처음 여는 사람에게는 설정부터 묻는다
+  $('obStart').value = toInputValue(new Date());
+  $('obPrice').value = String(CONFIG.pricePerPack);
+  $('obCigs').value = String(CONFIG.cigsPerDay);
+  openOverlay('onboarding');
+}
 
 // 켜둔 채로 자정이 지나면 자동으로 갱신
 setInterval(() => {
@@ -346,3 +395,10 @@ setInterval(() => {
     checkMilestone();
   }
 }, 60000);
+
+// 오프라인에서도 열리도록 서비스 워커 등록 (file://에서는 건너뜀)
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* 무시 */ });
+  });
+}

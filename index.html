@@ -2,8 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>금연 카운터</title>
-<link rel="stylesheet" href="style.css?v=20260806b">
+<meta name="description" content="금연 일수를 자동으로 세고 목표를 넘길 때마다 축하해주는 카운터">
+<meta name="theme-color" content="#0f1720">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css?v=20260806c">
 </head>
 <body>
 
@@ -52,6 +60,30 @@
   </footer>
 </main>
 
+<!-- 첫 실행: 초기 설정 -->
+<div id="onboarding" class="overlay hidden">
+  <div class="card">
+    <div class="cele-badge">시작하기</div>
+    <h1>금연 카운터</h1>
+    <p>딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
+    <label class="field">
+      <span>금연 시작일</span>
+      <input id="obStart" type="date">
+    </label>
+    <div class="field-row">
+      <label class="field">
+        <span>한 갑 가격 (원)</span>
+        <input id="obPrice" type="number" min="0" step="100" inputmode="numeric">
+      </label>
+      <label class="field">
+        <span>하루 흡연량 (개비)</span>
+        <input id="obCigs" type="number" min="1" step="1" inputmode="numeric">
+      </label>
+    </div>
+    <button id="obSave" class="primary" type="button">시작하기</button>
+  </div>
+</div>
+
 <!-- 축하 -->
 <div id="celebration" class="overlay hidden">
   <div class="card">
@@ -71,7 +103,17 @@
       <span>금연 시작일</span>
       <input id="startInput" type="date">
     </label>
-    <p class="sub">시작일을 바꾸면 일수와 아낀 돈이 그 날짜 기준으로 다시 계산돼요.</p>
+    <div class="field-row">
+      <label class="field">
+        <span>한 갑 가격 (원)</span>
+        <input id="priceInput" type="number" min="0" step="100" inputmode="numeric">
+      </label>
+      <label class="field">
+        <span>하루 흡연량 (개비)</span>
+        <input id="cigsInput" type="number" min="1" step="1" inputmode="numeric">
+      </label>
+    </div>
+    <p class="sub">설정은 이 브라우저에 저장돼요.</p>
     <div class="btn-row">
       <button id="settingsCancel" type="button">취소</button>
       <button id="settingsSave" class="primary" type="button">저장</button>
@@ -106,7 +148,7 @@
   </div>
 </div>
 
-<script src="config.js?v=20260806b"></script>
-<script src="app.js?v=20260806b"></script>
+<script src="config.js?v=20260806c"></script>
+<script src="app.js?v=20260806c"></script>
 </body>
 </html>
