@@ -10,6 +10,8 @@ const MODES = {
     startLabel: '금연 시작일',
     countLabel: '안 피운 담배',
     failLabel: '금연 실패',
+    guideHref: 'guide.html',
+    guideLabel: '금연 정보',
     // 하루에 아끼는 돈
     moneyPerDay: () => (getNum('cigsPerDay', CONFIG.cigsPerDay) / 20) * getNum('pricePerPack', CONFIG.pricePerPack),
     // 하루에 줄어드는 개수와 그 단위
@@ -24,6 +26,8 @@ const MODES = {
     startLabel: '금주 시작일',
     countLabel: '안 마신 술자리',
     failLabel: '금주 실패',
+    guideHref: 'guide-drink.html',
+    guideLabel: '금주 정보',
     moneyPerDay: () => (getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7) * getNum('costPerDrink', CONFIG.costPerDrink),
     countPerDay: () => getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7,
     countUnit: '번',
@@ -147,18 +151,28 @@ function lifeGainedFor(age) {
 }
 
 // ===== 마일스톤 =====
+// 10일마다 축하하고, 100일 단위는 더 특별하게 축하한다.
 
-function sortedMilestones() {
-  return (CONFIG.milestones || []).slice().sort((a, b) => a - b);
-}
+function everyN() { return CONFIG.milestoneEvery > 0 ? CONFIG.milestoneEvery : 10; }
+function specialN() { return CONFIG.specialEvery > 0 ? CONFIG.specialEvery : 100; }
+
+function isMilestone(day) { return day > 0 && day % everyN() === 0; }
+function isSpecial(day) { return day > 0 && day % specialN() === 0; }
 
 function nextMilestone(day) {
-  return sortedMilestones().find((m) => m > day) || null;
+  const n = everyN();
+  return (Math.floor(Math.max(day, 0) / n) + 1) * n;
 }
 
 function prevMilestone(day) {
-  const passed = sortedMilestones().filter((m) => m <= day);
-  return passed.length ? passed[passed.length - 1] : 0;
+  const n = everyN();
+  return Math.floor(Math.max(day, 0) / n) * n;
+}
+
+function milestoneMessage(day) {
+  const table = CONFIG.milestoneMessages || {};
+  if (table[day]) return table[day];
+  return CONFIG.defaultMessage ? CONFIG.defaultMessage(day) : `${day}일 달성`;
 }
 
 // ===== 화면 그리기 =====
@@ -175,6 +189,9 @@ function applyModeLabels() {
   $('obStartLabel').textContent = m.startLabel;
   $('startInputLabel').textContent = m.startLabel;
   $('settingsTitle').textContent = m.verb + ' 설정';
+  // 아래 메뉴의 정보 링크도 탭에 맞춰 바뀐다
+  $('guideLink').href = m.guideHref;
+  $('guideLink').textContent = m.guideLabel;
   document.body.dataset.mode = mode;
   setSeg('modeTabs', mode);
 }
@@ -193,16 +210,14 @@ function render() {
   } else {
     $('dayNum').textContent = comma(day);
     const next = nextMilestone(day);
-    $('nextGoal').innerHTML = next
-      ? `다음 목표 <strong>${next}일</strong>까지 <strong>${next - day}일</strong> 남았어요`
-      : '모든 목표를 다 넘었어요. 계속 가요!';
+    $('nextGoal').innerHTML = `다음 목표 <strong>${next}일</strong>까지 <strong>${next - day}일</strong> 남았어요`;
   }
 
   // 진행 링: 직전 마일스톤 → 다음 마일스톤 구간의 진행률
   const shown = Math.max(day, 0);
   const from = prevMilestone(shown);
   const to = nextMilestone(shown);
-  const ratio = to ? Math.min(Math.max((shown - from) / (to - from), 0), 1) : 1;
+  const ratio = Math.min(Math.max((shown - from) / (to - from), 0), 1);
   const circumference = 2 * Math.PI * 88;
   const ring = $('ringFg');
   ring.style.strokeDasharray = String(circumference);
@@ -284,25 +299,37 @@ function renderInsight() {
 // ===== 축하 =====
 
 function showCelebration(day) {
-  const msg = (CONFIG.milestoneMessages || {})[day] || `${day}일 달성`;
   const m = M();
+  const special = isSpecial(day);
 
-  $('celeBadge').textContent = `${comma(day)}일`;
-  $('celeMsg').textContent = msg;
+  $('celeBadge').textContent = special && CONFIG.specialMessage
+    ? CONFIG.specialMessage(day)
+    : `${comma(day)}일`;
+  $('celeTitle').textContent = special ? `${comma(day)}일 달성!` : '축하합니다!';
+  $('celeMsg').textContent = milestoneMessage(day);
   $('celeSub').textContent =
     `지금까지 ${comma(day * m.moneyPerDay())}원을 아꼈고, ` + m.celebrateText(day * m.countPerDay());
 
+  $('celebration').classList.toggle('special', special);
   $('celebration').classList.remove('hidden');
-  particles.confetti(160);
-  setTimeout(() => particles.confetti(120), 700);
-  setTimeout(() => particles.confetti(120), 1500);
+
+  if (special) {
+    // 100일 단위는 더 오래, 더 많이 터뜨린다
+    particles.confetti(240, true);
+    for (const delay of [500, 1000, 1600, 2300, 3100]) {
+      setTimeout(() => particles.confetti(180, true), delay);
+    }
+  } else {
+    particles.confetti(160);
+    setTimeout(() => particles.confetti(120), 700);
+    setTimeout(() => particles.confetti(120), 1500);
+  }
 }
 
 // 오늘이 마일스톤이고 아직 축하를 안 봤다면 띄운다
 function checkMilestone() {
   const day = currentDay();
-  if (day <= 0) return;
-  if (!sortedMilestones().includes(day)) return;
+  if (!isMilestone(day)) return;
   if (get('celebrated') === String(day)) return;
   set('celebrated', String(day));
   showCelebration(day);
@@ -319,6 +346,8 @@ const particles = (function () {
   const canvas = $('confetti');
   const ctx = canvas.getContext('2d');
   const colors = ['#4ade80', '#facc15', '#60a5fa', '#f472b6', '#fb923c', '#ffffff'];
+  // 100일 단위 축하는 금색 위주로 터진다
+  const goldColors = ['#facc15', '#fbbf24', '#fde68a', '#f59e0b', '#ffffff', '#4ade80'];
   const ashColors = ['#6b7681', '#8a949c', '#4d565e', '#9aa4ab'];
   let items = [];
   let running = false;
@@ -335,16 +364,17 @@ const particles = (function () {
     if (!running) { running = true; requestAnimationFrame(tick); }
   }
 
-  function confetti(count) {
+  function confetti(count, gold) {
+    const palette = gold ? goldColors : colors;
     for (let i = 0; i < count; i++) {
       items.push({
         kind: 'confetti',
-        x: canvas.width / 2 + (Math.random() - 0.5) * canvas.width * 0.6,
+        x: canvas.width / 2 + (Math.random() - 0.5) * canvas.width * (gold ? 0.9 : 0.6),
         y: canvas.height * 0.45 + (Math.random() - 0.5) * 60,
-        vx: (Math.random() - 0.5) * 9,
-        vy: Math.random() * -11 - 3,
-        size: Math.random() * 6 + 4,
-        color: colors[(Math.random() * colors.length) | 0],
+        vx: (Math.random() - 0.5) * (gold ? 12 : 9),
+        vy: Math.random() * (gold ? -14 : -11) - 3,
+        size: Math.random() * (gold ? 8 : 6) + 4,
+        color: palette[(Math.random() * palette.length) | 0],
         rot: Math.random() * Math.PI,
         vr: (Math.random() - 0.5) * 0.25,
         life: 1,
@@ -562,11 +592,6 @@ $('settingsSave').addEventListener('click', () => {
 // ===== 축하 / 실패 =====
 
 $('celeClose').addEventListener('click', () => closeOverlay('celebration'));
-
-$('previewBtn').addEventListener('click', () => {
-  const day = currentDay();
-  showCelebration(day > 0 ? (nextMilestone(day - 1) || day) : 1);
-});
 
 $('failBtn').addEventListener('click', () => {
   const day = Math.max(currentDay(), 0);

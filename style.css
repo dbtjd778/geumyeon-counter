@@ -260,6 +260,42 @@ body[data-mode="drink"] .only-smoke { display: none; }
 .bottom button.danger { color: rgba(248, 113, 113, 0.75); border-color: rgba(248, 113, 113, 0.28); }
 .bottom button.danger:hover { color: var(--danger); border-color: rgba(248, 113, 113, 0.6); }
 
+/* 링크지만 버튼처럼 보이는 것 (데스크탑에 설치) */
+.ghost-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 10px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ghost-btn:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.28); }
+
+/* 100일 단위 특별 축하 */
+.overlay.special .card {
+  background: linear-gradient(160deg, #3a3018, #1c1a10);
+  border-color: rgba(250, 204, 21, 0.55);
+  box-shadow: 0 18px 60px rgba(250, 204, 21, 0.12), 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.overlay.special .cele-badge {
+  background: linear-gradient(100deg, #facc15, #fbbf24);
+  color: #2a1f05;
+}
+
+.overlay.special .card h1 {
+  background: linear-gradient(100deg, #fde68a, #facc15);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.overlay.special .card button.primary { background: #facc15; color: #2a1f05; }
+
 /* ===== 오버레이 공통 ===== */
 .overlay {
   position: fixed;
@@ -524,6 +560,47 @@ body[data-mode="drink"] .only-smoke { display: none; }
 }
 
 .notice p:last-child { margin-bottom: 0; }
+
+/* 설치 버튼 박스 */
+.install-box {
+  margin: 26px 0 34px;
+  padding: 22px 20px;
+  border: 1px solid rgba(74, 222, 128, 0.32);
+  background: rgba(74, 222, 128, 0.06);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.install-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 11px;
+  background: var(--accent);
+  color: #0f1720;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.install-btn:hover:not(:disabled) { filter: brightness(1.08); }
+
+.install-btn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  cursor: default;
+}
+
+.install-state {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.page ol { margin: 0 0 14px 20px; }
+.page ol li { margin-bottom: 6px; }
 
 /* 글 목록 카드 */
 .card-list {
