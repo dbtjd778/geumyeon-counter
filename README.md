@@ -26,6 +26,7 @@
 - `index.html` — 카운터 (금연 / 금주 탭)
 - `guide.html` — 금연 정보 목록 → `harms.html`, `recovery.html`, `withdrawal.html`
 - `guide-drink.html` — 금주 정보 목록 → `alcohol-harms.html`, `alcohol-benefits.html`
+- `test.html` + `test.js` — 술자리 성격 테스트 (MBTI 기반 8캐릭터). 답변을 저장하지 않고, 결과는 `?r=ESTP` 형태의 주소로 공유된다.
 - `install.html` — 데스크탑 설치 및 자동 실행 안내
 - `about.html`, `privacy.html`, `contact.html`
 

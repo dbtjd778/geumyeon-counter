@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>술자리 성격 테스트 — 오늘만 하고 끊을게</title>
+<meta name="description" content="술자리 상황 10개로 알아보는 나의 성격 유형. 광란의 3차 지배자부터 알코올 힐링 상담사까지 8가지 캐릭터 중 나는 어디에 속할까?">
+<meta name="theme-color" content="#0f1720">
+<link rel="icon" href="icon-192.png">
+<meta property="og:title" content="술자리 성격 테스트">
+<meta property="og:description" content="술자리 상황 10개로 알아보는 나의 성격 유형. 8가지 캐릭터 중 나는?">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="style.css?v=20260807i">
+</head>
+<body>
+
+<div class="page">
+  <header class="page-head">
+    <a class="brand" href="./">오늘만 하고 끊을게</a>
+    <nav>
+      <a href="./">카운터</a>
+      <a href="guide.html">금연 정보</a>
+      <a href="guide-drink.html">금주 정보</a>
+      <a href="test.html" aria-current="page">심리테스트</a>
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="contact.html">문의</a>
+    </nav>
+  </header>
+
+  <!-- 시작 화면 -->
+  <section id="screenStart" class="test-screen hidden">
+    <div class="test-hero">
+      <div class="test-hero-emoji">🍻</div>
+      <h1>술자리 상황으로 알아보는<br>나의 성격 테스트</h1>
+      <p class="test-lead">10개의 술자리 상황, 8가지 캐릭터</p>
+      <p>회식 자리에서 나는 분위기를 이끄는 쪽일까, 조용히 잔만 비우는 쪽일까. 막차 앞에서 어떤 선택을 하는 사람일까. 익숙한 술자리 상황 10개로 알아보는 나의 유형입니다.</p>
+      <p>1분이면 끝나고, 답변은 어디에도 저장되지 않습니다.</p>
+      <button id="startBtn" class="test-cta" type="button">테스트 시작하기</button>
+    </div>
+
+    <div class="notice">
+      <p>재미로 보는 테스트입니다. MBTI는 성격의 경향을 나눠보는 지표일 뿐 의학적·심리학적 진단이 아니며, 결과가 특정한 음주 습관을 권하거나 정당화하지 않습니다.</p>
+    </div>
+
+    <h2>이런 캐릭터들이 있어요</h2>
+    <div class="test-preview">
+      <span>🔥 광란의 3차 지배자</span>
+      <span>🚂 헛소리 폭주 기관차</span>
+      <span>📋 술자리 총지배인</span>
+      <span>✨ 리액션 만렙 알코올 요정</span>
+      <span>🥷 소리 없이 사라지는 귀가 요정</span>
+      <span>🐋 조용한 술고래</span>
+      <span>🚇 철벽의 막차 사수대</span>
+      <span>🫂 알코올 힐링 상담사</span>
+    </div>
+  </section>
+
+  <!-- 진행 화면 -->
+  <section id="screenQuiz" class="test-screen hidden">
+    <div class="q-progress">
+      <div class="q-progress-top">
+        <span id="qProgressText">1 / 10</span>
+        <button id="backBtn" class="q-back hidden" type="button">← 이전</button>
+      </div>
+      <div class="q-progress-bar"><div id="qProgressFill" class="q-progress-fill"></div></div>
+    </div>
+
+    <div id="qCard" class="q-card">
+      <span id="qNumber" class="q-number">Q1</span>
+      <h2 id="qText" class="q-text"></h2>
+      <div class="q-answers">
+        <button id="answerA" class="q-answer" type="button"></button>
+        <button id="answerB" class="q-answer" type="button"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결과 화면 -->
+  <section id="screenResult" class="test-screen hidden">
+    <p id="sharedNote" class="shared-note hidden">친구가 공유한 결과예요. 아래에서 나도 해볼 수 있어요.</p>
+
+    <div class="result-card">
+      <p class="result-label">당신의 술자리 유형은</p>
+      <div id="resultEmoji" class="result-emoji">🍻</div>
+      <h1 id="resultName" class="result-name"></h1>
+      <div id="resultMbti" class="result-mbti"></div>
+      <div id="resultTags" class="result-tags"></div>
+    </div>
+
+    <div class="result-desc-card">
+      <h2>성격 및 술자리 행동 패턴</h2>
+      <p id="resultDesc"></p>
+    </div>
+
+    <div class="result-actions">
+      <button id="shareBtn" class="test-cta" type="button">결과 공유하기</button>
+      <button id="retryBtn" class="test-cta ghost" type="button">다시 하기</button>
+    </div>
+
+    <div class="notice">
+      <p>재미로 보는 테스트이며 의학적·심리학적 진단이 아닙니다. 술자리에서의 나를 돌아봤다면, 이번엔 <a href="./">카운터</a>의 금주 탭에서 며칠째인지 세어보는 건 어떨까요. 술이 몸에서 하는 일은 <a href="alcohol-harms.html">이 글</a>에 정리해두었습니다.</p>
+    </div>
+  </section>
+
+  <footer class="page-foot">
+    <a href="./">카운터</a> · <a href="guide.html">금연 정보</a> · <a href="guide-drink.html">금주 정보</a> · <a href="about.html">소개</a> · <a href="privacy.html">개인정보처리방침</a> · <a href="contact.html">문의</a> · <a href="install.html">데스크탑 설치</a>
+  </footer>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="test.js?v=20260807i"></script>
+</body>
+</html>
+
