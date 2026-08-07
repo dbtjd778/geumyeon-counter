@@ -54,6 +54,66 @@ body.app {
   transition: filter 1s ease, opacity 1s ease;
 }
 
+/* 자동 실행 안내 배너 — 앱으로 설치되지 않은 상태에서만 보인다 */
+.install-banner {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: 460px;
+  margin: 10px auto 0;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  background: linear-gradient(100deg, rgba(74, 222, 128, 0.16), rgba(74, 222, 128, 0.07));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.install-banner.hidden { display: none; }
+
+.install-banner-link {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 4px 10px 14px;
+  text-decoration: none;
+  display: block;
+}
+
+.install-banner-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+
+.install-banner-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #9fb6c2;
+}
+
+.install-banner-link:hover .install-banner-sub { color: var(--text); }
+
+.install-banner-close {
+  flex: 0 0 auto;
+  width: 34px;
+  border: none;
+  background: none;
+  color: #7d95a3;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.install-banner-close:hover { color: var(--text); }
+
+/* 배너가 떠 있을 때는 링을 줄여 400x600 창에 그대로 들어가게 한다 */
+body.has-banner .ring-wrap { width: 118px; height: 118px; }
+body.has-banner .day-num { font-size: 40px; }
+body.has-banner .counter { gap: 8px; }
+
 /* 카운터 화면 아래의 사이트 메뉴 */
 .sitenav {
   flex: 0 0 auto;

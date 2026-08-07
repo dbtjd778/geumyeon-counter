@@ -11,11 +11,19 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260807g">
+<link rel="stylesheet" href="style.css?v=20260807h">
 </head>
 <body class="app">
 
 <canvas id="confetti"></canvas>
+
+<div id="installBanner" class="install-banner hidden">
+  <a class="install-banner-link" href="install.html">
+    <span class="install-banner-title">컴퓨터 켤 때마다 자동으로 뜨게 하기</span>
+    <span class="install-banner-sub">설치 파일 없이 2단계면 끝나요 &nbsp;→</span>
+  </a>
+  <button id="bannerClose" class="install-banner-close" type="button" title="닫기" aria-label="배너 닫기">×</button>
+</div>
 
 <main id="widget" class="widget">
   <header class="top">
@@ -63,7 +71,7 @@
   <footer class="bottom">
     <span id="startInfo"></span>
     <span class="bottom-btns">
-      <a class="ghost-btn" href="install.html">데스크탑에 설치</a>
+      <a id="ghostBtn" class="ghost-btn" href="install.html">데스크탑에 설치</a>
       <button id="failBtn" class="danger" type="button">금연 실패</button>
     </span>
   </footer>
@@ -225,8 +233,9 @@
   </div>
 </div>
 
-<script src="config.js?v=20260807g"></script>
-<script src="app.js?v=20260807g"></script>
+<script src="config.js?v=20260807h"></script>
+<script src="app.js?v=20260807h"></script>
 </body>
 </html>
+
 

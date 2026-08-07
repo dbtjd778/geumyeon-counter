@@ -649,9 +649,39 @@ function switchMode(next) {
   }
 }
 
+// ===== 자동 실행 안내 배너 =====
+// 앱으로 설치해서 열었다면 이미 목적을 달성한 상태이므로 배너를 띄우지 않는다.
+
+const KEY_BANNER = 'qs.bannerDismissed';
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.matchMedia('(display-mode: window-controls-overlay)').matches
+    || window.navigator.standalone === true;
+}
+
+function initInstallBanner() {
+  const standalone = isStandalone();
+
+  // 설치한 사람에게는 남은 할 일이 '자동 실행 켜기'뿐이다
+  $('ghostBtn').textContent = standalone ? '자동 실행 설정' : '데스크탑에 설치';
+  $('ghostBtn').href = standalone ? 'install.html#autostart' : 'install.html';
+
+  const show = !standalone && readStore(KEY_BANNER) !== '1';
+  $('installBanner').classList.toggle('hidden', !show);
+  document.body.classList.toggle('has-banner', show);
+}
+
+$('bannerClose').addEventListener('click', () => {
+  writeStore(KEY_BANNER, '1');
+  $('installBanner').classList.add('hidden');
+  document.body.classList.remove('has-banner');
+});
+
 // ===== 시작 =====
 
 migrateOldKeys();
+initInstallBanner();
 
 const savedMode = readStore(KEY_MODE);
 if (MODES[savedMode]) mode = savedMode;
