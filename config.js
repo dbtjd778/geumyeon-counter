@@ -10,6 +10,23 @@ const CONFIG = {
   pricePerPack: 4500,   // 담배 한 갑 가격 (원)
   cigsPerDay: 20,       // 하루 흡연량 (개비). 한 갑 = 20개비
 
+  // 현재흡연자의 하루 평균 흡연량 (개비)
+  // 출처: 국가암정보센터(국립암센터) — 성인 흡연자 1일 평균 흡연량
+  averageCigs: {
+    male: 13.4,
+    female: 7.3,
+  },
+
+  // 금연 시작 연령대별로 되찾는 기대수명
+  // 출처: Jha et al., "21st-Century Hazards of Smoking and Benefits of
+  //       Cessation in the United States", NEJM 2013 (PMID 23343063)
+  // 논문 초록에 수치가 있는 구간만 넣었다. 그 밖의 나이는 문구로만 안내한다.
+  lifeGained: [
+    { min: 25, max: 34, years: 10 },
+    { min: 35, max: 44, years: 9 },
+    { min: 45, max: 54, years: 6 },
+  ],
+
   // 축하 효과가 터지는 날 (일차 기준, 시작일이 1일차)
   milestones: [1, 3, 7, 10, 14, 21, 30, 50, 100, 150, 200, 300, 365, 500, 730, 1000],
 

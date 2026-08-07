@@ -5,6 +5,8 @@
 const KEY_START = 'qs.startDate';
 const KEY_PRICE = 'qs.pricePerPack';
 const KEY_CIGS = 'qs.cigsPerDay';
+const KEY_GENDER = 'qs.gender';
+const KEY_AGE = 'qs.age';
 const KEY_CELEBRATED = 'qs.celebrated';
 
 function readStore(key) {
@@ -56,6 +58,36 @@ function getCigsPerDay() {
 
 function moneyPerDay() {
   return (getCigsPerDay() / 20) * getPricePerPack();
+}
+
+// 'male' | 'female' | '' (안 밝힘)
+function getGender() {
+  const v = readStore(KEY_GENDER);
+  return (v === 'male' || v === 'female') ? v : '';
+}
+
+// 나이는 선택 항목이라 없으면 null
+function getAge() {
+  const v = Number(readStore(KEY_AGE));
+  return (v > 0 && v < 130) ? Math.floor(v) : null;
+}
+
+// 성별에 해당하는 하루 평균 흡연량 (개비). 안 밝혔으면 null
+function averageCigsFor(gender) {
+  const table = CONFIG.averageCigs || {};
+  return table[gender] > 0 ? table[gender] : null;
+}
+
+// 금연으로 되찾는 기대수명. 근거 수치가 있는 연령대만 숫자를 돌려준다.
+function lifeGainedFor(age) {
+  if (age === null) return null;
+  const hit = (CONFIG.lifeGained || []).find((r) => age >= r.min && age <= r.max);
+  return hit ? hit.years : null;
+}
+
+// 소수점이 있을 때만 한 자리까지 보여준다 (13.4 → "13.4", 20 → "20")
+function trim1(n) {
+  return (Math.round(n * 10) / 10).toString();
 }
 
 // 시작일이 1일차. 시작일이 아직 안 왔으면 0 이하가 나온다.
@@ -134,6 +166,64 @@ function render() {
   $('startInfo').textContent = start
     ? `시작 ${start.getFullYear()}.${start.getMonth() + 1}.${start.getDate()}`
     : '시작일 미설정';
+
+  renderInsight();
+}
+
+// 성별·나이를 넣은 사람에게만 보여주는 추가 정보
+function renderInsight() {
+  const avgEl = $('insightAvg');
+  const lifeEl = $('insightLife');
+  const srcEl = $('insightSource');
+  const sources = [];
+
+  // 같은 성별 평균과 비교
+  const avg = averageCigsFor(getGender());
+  if (avg !== null) {
+    const mine = getCigsPerDay();
+    const diff = mine - avg;
+    const avgText = `같은 성별 평균 <strong>하루 ${trim1(avg)}개비</strong>`;
+    if (diff > 0.05) {
+      avgEl.innerHTML = `${avgText}보다 ${trim1(diff)}개비 더 피우고 있었어요.`;
+    } else if (diff < -0.05) {
+      avgEl.innerHTML = `${avgText}보다 ${trim1(-diff)}개비 적게 피우고 있었어요.`;
+    } else {
+      avgEl.innerHTML = `${avgText}과 거의 같았어요.`;
+    }
+    avgEl.classList.remove('hidden');
+    sources.push('평균 흡연량: 국가암정보센터');
+  } else {
+    avgEl.classList.add('hidden');
+  }
+
+  // 나이에 따른 기대수명
+  const age = getAge();
+  if (age !== null) {
+    const years = lifeGainedFor(age);
+    if (years !== null) {
+      lifeEl.innerHTML =
+        `이 나이에 끊으면 계속 피우는 경우보다 <strong>약 ${years}년</strong>을 더 사는 것으로 나타났어요.`;
+      sources.push('기대수명: NEJM 2013');
+    } else if (age < 25) {
+      lifeEl.innerHTML =
+        `40세 이전에 끊으면 흡연으로 늘어나는 사망 위험의 <strong>약 90%</strong>를 피할 수 있어요.`;
+      sources.push('기대수명: NEJM 2013');
+    } else {
+      lifeEl.innerHTML = '금연의 이득은 시작하는 나이와 상관없이 남아요.';
+    }
+    lifeEl.classList.remove('hidden');
+  } else {
+    lifeEl.classList.add('hidden');
+  }
+
+  if (sources.length) {
+    srcEl.textContent = '출처 — ' + sources.join(' / ');
+    srcEl.classList.remove('hidden');
+  } else {
+    srcEl.classList.add('hidden');
+  }
+
+  $('insight').classList.toggle('hidden', avgEl.classList.contains('hidden') && lifeEl.classList.contains('hidden'));
 }
 
 // ===== 축하 =====
@@ -290,6 +380,43 @@ const particles = (function () {
 function openOverlay(id) { $(id).classList.remove('hidden'); }
 function closeOverlay(id) { $(id).classList.add('hidden'); }
 
+// ===== 성별 선택 버튼 =====
+
+function setSeg(id, value) {
+  const box = $(id);
+  box.dataset.value = value;
+  for (const b of box.querySelectorAll('button')) {
+    b.classList.toggle('active', b.dataset.v === value);
+  }
+}
+
+function getSeg(id) { return $(id).dataset.value || ''; }
+
+function initSeg(id, onChange) {
+  $(id).addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-v]');
+    if (!btn) return;
+    setSeg(id, btn.dataset.v);
+    if (onChange) onChange(btn.dataset.v);
+  });
+}
+
+// 첫 설정에서는 성별을 고르면 평균 흡연량을 미리 채워준다
+initSeg('obGender', (v) => {
+  const avg = averageCigsFor(v);
+  if (avg !== null) $('obCigs').value = String(avg);
+});
+
+// 설정 화면에서는 이미 넣어둔 값을 함부로 덮어쓰지 않는다
+initSeg('genderInput');
+
+// 성별·나이를 저장한다 (빈 값이면 지운다)
+function saveProfile(gender, ageText) {
+  writeStore(KEY_GENDER, gender);
+  const age = Number(ageText);
+  writeStore(KEY_AGE, (age > 0 && age < 130) ? String(Math.floor(age)) : '');
+}
+
 // 첫 실행 설정
 $('obSave').addEventListener('click', () => {
   const d = parseDate($('obStart').value);
@@ -302,6 +429,7 @@ $('obSave').addEventListener('click', () => {
   setStartDate(d);
   writeStore(KEY_PRICE, String(price));
   writeStore(KEY_CIGS, String(cigs));
+  saveProfile(getSeg('obGender'), $('obAge').value);
   closeOverlay('onboarding');
   render();
   checkMilestone();
@@ -320,6 +448,8 @@ $('settingsBtn').addEventListener('click', () => {
   $('startInput').value = toInputValue(getStartDate() || new Date());
   $('priceInput').value = String(getPricePerPack());
   $('cigsInput').value = String(getCigsPerDay());
+  setSeg('genderInput', getGender());
+  $('ageInput').value = getAge() === null ? '' : String(getAge());
   openOverlay('settings');
 });
 
@@ -336,6 +466,7 @@ $('settingsSave').addEventListener('click', () => {
   setStartDate(d);
   writeStore(KEY_PRICE, String(price));
   writeStore(KEY_CIGS, String(cigs));
+  saveProfile(getSeg('genderInput'), $('ageInput').value);
   suppressTodayCelebration();
   closeOverlay('settings');
   render();
