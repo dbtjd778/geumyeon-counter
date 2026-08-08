@@ -1,0 +1,40 @@
+# Netlify 배포 설정
+# 빌드 도구가 없는 정적 사이트라 빌드 명령은 없고, 저장소 루트를 그대로 게시한다.
+
+[build]
+  publish = "."
+  command = ""
+
+# 서비스 워커와 HTML은 캐시를 오래 물고 있으면 배포해도 새 화면이 안 보인다.
+# 매번 서버에 확인하도록 두고, 실제 캐싱은 서비스 워커가 담당한다.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# 아이콘처럼 잘 안 바뀌는 파일은 오래 캐시해도 된다.
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# CSS와 JS는 주소에 ?v= 를 붙여 쓰고 있으므로 길게 캐시해도 안전하다.
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
