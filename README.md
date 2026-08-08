@@ -1,8 +1,8 @@
-# 오늘만 하고 끊을게
+﻿# 오늘만 하고 끊을게
 
 금연 일수를 자동으로 세고, 목표를 넘길 때마다 축하해주는 작은 앱.
 
-사이트: https://dbtjd778.github.io/geumyeon-counter/
+사이트: https://todayquit.com/
 문의: geumyeon.counter@gmail.com
 
 ## 쓰는 법
@@ -72,3 +72,4 @@
 빌드 도구 없는 순수 정적 웹이다. `config.js`에서 축하가 터지는 날짜(`milestones`)와 문구(`milestoneMessages`)를 바꿀 수 있다.
 
 파일을 고친 뒤에는 `sw.js` 맨 위의 `CACHE` 이름을 바꿔야 이미 접속했던 사람에게 새 버전이 내려간다.
+

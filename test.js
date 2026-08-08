@@ -250,7 +250,7 @@ function restart() {
 
 // 앱(file://)에서 공유하면 로컬 경로가 나가버리므로 그때는 이 주소를 쓴다.
 // 도메인이 바뀌면 여기를 고칠 것.
-const SITE_URL = 'https://dbtjd778.github.io/geumyeon-counter/';
+const SITE_URL = 'https://todayquit.com/';
 
 function shareUrlFor(type) {
   if (location.protocol === 'file:') return `${SITE_URL}test.html?r=${type}`;
