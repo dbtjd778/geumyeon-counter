@@ -1181,6 +1181,215 @@ body[data-mode="drink"] .only-smoke { display: none; }
   .result-actions { grid-template-columns: 1fr 1fr; }
 }
 
+/* ===== 미니 도구 페이지 ===== */
+.tool-panel.hidden, .breath-result.hidden, #ageResult.hidden, #breathStop.hidden, #breathStart.hidden { display: none; }
+
+.tool-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 24px 0 30px;
+  padding: 5px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line);
+}
+
+.tool-tabs button {
+  flex: 1;
+  padding: 11px 6px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tool-tabs button:hover { color: var(--text); }
+
+.tool-tabs button.active {
+  background: var(--grad-accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(74, 222, 128, 0.25);
+}
+
+.notice-warn {
+  border-color: rgba(251, 113, 133, 0.4);
+  background: linear-gradient(150deg, rgba(251, 113, 133, 0.12), rgba(251, 113, 133, 0.03));
+}
+
+.notice-warn ul { margin: 10px 0 0 20px; }
+.notice-warn li { font-size: 14px; margin-bottom: 5px; }
+
+/* 숨참기 */
+.breath-stage { text-align: center; margin: 26px 0 10px; }
+
+.breath-ring-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.breath-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.breath-ring-bg { fill: none; stroke: rgba(255, 255, 255, 0.07); stroke-width: 12; }
+
+.breath-ring-fg {
+  fill: none;
+  stroke: url(#breathGrad);
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-dasharray: 540;
+  stroke-dashoffset: 540;
+  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.4));
+  transition: stroke-dashoffset 0.1s linear;
+}
+
+.breath-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.breath-time {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(165deg, #ffffff 20%, #a7f3d0 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.breath-unit { font-size: 13px; color: var(--text-mute); margin-top: 4px; }
+
+.breath-hint { margin: 18px 0 0; font-size: 14px; color: var(--text-dim); }
+.breath-hint strong { color: var(--accent); }
+
+.breath-actions { margin-top: 6px; }
+.breath-result { margin-top: 24px; }
+.breath-result-msg { margin-top: 14px; font-size: 14px; line-height: 1.7; color: #c6d6df; }
+.breath-result .test-cta { margin-top: 12px; }
+
+/* 스노우볼 계산기 */
+body[data-money-kind="smoke"] .only-drink-tool,
+body[data-money-kind="drink"] .only-smoke-tool { display: none; }
+
+.money-summary { display: flex; gap: 10px; margin: 26px 0 20px; }
+
+.money-cards { display: grid; gap: 12px; }
+
+.money-card {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.money-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.money-years { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
+.money-reward { font-size: 12.5px; color: var(--accent); font-weight: 600; }
+
+.money-bars { display: grid; gap: 8px; }
+
+.money-bar-row {
+  display: grid;
+  grid-template-columns: 84px 1fr auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.money-bar-label { font-size: 11.5px; color: var(--text-mute); }
+
+.money-bar {
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.money-bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+.money-bar-fill.plain { background: rgba(255, 255, 255, 0.28); }
+.money-bar-fill.grow { background: var(--grad-accent); }
+
+.money-bar-value { font-size: 12.5px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.money-bar-value.strong { color: var(--text); font-weight: 700; }
+
+.money-gain { margin: 12px 0 0; font-size: 12.5px; color: var(--text-mute); }
+.money-gain strong { color: var(--accent); }
+
+/* 추정 신체 나이 */
+.seg-wrap { flex-wrap: wrap; }
+.seg-wrap button { flex: 1 1 calc(50% - 3px); min-width: 0; }
+
+.age-result-card { margin-top: 22px; }
+
+.age-pair { display: flex; gap: 10px; margin-top: 16px; }
+
+.age-box {
+  flex: 1;
+  padding: 16px 10px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+}
+
+.age-box-label { display: block; font-size: 11.5px; color: var(--text-dim); margin-bottom: 6px; }
+
+.age-box-value {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(165deg, #ffffff 20%, #a7f3d0 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.age-box-unit { font-size: 13px; color: var(--text-mute); margin-left: 2px; }
+
+.dday-list { display: grid; gap: 8px; margin-top: 16px; }
+
+.dday-row {
+  display: grid;
+  grid-template-columns: 74px 116px 1fr;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dday-when { font-size: 13px; font-weight: 700; color: var(--accent); }
+.dday-date { font-size: 12px; color: var(--text-mute); font-variant-numeric: tabular-nums; }
+.dday-text { font-size: 13.5px; line-height: 1.6; color: #b9cad6; }
+
+@media (max-width: 560px) {
+  .tool-tabs button { font-size: 12.5px; padding: 10px 4px; }
+  .money-bar-row { grid-template-columns: 68px 1fr auto; }
+  .dday-row { grid-template-columns: 1fr; gap: 3px; }
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @keyframes popIn {
