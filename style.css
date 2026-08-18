@@ -1170,15 +1170,25 @@ body[data-mode="drink"] .only-smoke { display: none; }
   background: rgba(255, 255, 255, 0.03);
 }
 
-.result-desc-card h2 { margin: 0 0 10px; padding: 0; font-size: 15px; }
+.result-desc-card h2 { margin: 0 0 12px; padding: 0; font-size: 15px; }
 .result-desc-card p { margin: 0; font-size: 14.5px; line-height: 1.85; }
 
 /* 결과 설명은 '평소 성격'과 '술자리·흡연 스타일' 두 단락으로 나뉜다 */
 .result-part + .result-part {
-  margin-top: 18px;
-  padding-top: 18px;
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* 설명이 길어 문장 두 개씩 문단으로 끊어 넣는다.
+   keep-all 로 한글 단어가 줄 끝에서 쪼개지지 않게 한다. */
+.result-body p {
+  line-height: 1.9;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.result-body p + p { margin-top: 11px; }
 
 .result-actions { display: grid; gap: 10px; margin-top: 20px; }
 .result-actions .test-cta { margin-top: 0; }
