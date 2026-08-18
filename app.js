@@ -12,10 +12,6 @@ const MODES = {
     failLabel: '금연 실패',
     guideHref: 'guide.html',
     guideLabel: '금연 정보',
-    testHref: 'test-smoke.html',
-    testEmoji: '🚬',
-    testTitle: '흡연 & 금연 성향 테스트',
-    testSub: '나에게 맞는 금연 전략은?',
     toolsSub: '숨참기 챌린지 · 아낀 돈 스노우볼',
     // 하루에 아끼는 돈
     moneyPerDay: () => (getNum('cigsPerDay', CONFIG.cigsPerDay) / 20) * getNum('pricePerPack', CONFIG.pricePerPack),
@@ -33,10 +29,6 @@ const MODES = {
     failLabel: '금주 실패',
     guideHref: 'guide-drink.html',
     guideLabel: '금주 정보',
-    testHref: 'test.html',
-    testEmoji: '🍻',
-    testTitle: '술자리 성격 테스트',
-    testSub: '나는 어떤 타입이었을까?',
     toolsSub: '아낀 돈 스노우볼 · 신체 나이',
     moneyPerDay: () => (getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7) * getNum('costPerDrink', CONFIG.costPerDrink),
     countPerDay: () => getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7,
@@ -202,11 +194,9 @@ function applyModeLabels() {
   // 아래 메뉴의 정보 링크도 탭에 맞춰 바뀐다
   $('guideLink').href = m.guideHref;
   $('guideLink').textContent = m.guideLabel;
-  // 심리테스트는 탭마다 다른 테스트로 연결된다
-  $('testPromo').href = m.testHref;
-  $('testPromoEmoji').textContent = m.testEmoji;
-  $('testPromoTitle').textContent = m.testTitle;
-  $('testPromoSub').textContent = m.testSub;
+  // 두 테스트 모두 항상 열어두고, 지금 탭에 맞는 쪽만 강조한다
+  $('promoTestSmoke').classList.toggle('is-current', mode === 'smoke');
+  $('promoTestDrink').classList.toggle('is-current', mode === 'drink');
   $('toolsPromoSub').textContent = m.toolsSub;
   document.body.dataset.mode = mode;
   setSeg('modeTabs', mode);
