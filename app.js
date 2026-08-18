@@ -12,6 +12,10 @@ const MODES = {
     failLabel: '금연 실패',
     guideHref: 'guide.html',
     guideLabel: '금연 정보',
+    testHref: 'test-smoke.html',
+    testEmoji: '🚬',
+    testTitle: '흡연 & 금연 성향 테스트',
+    testSub: '나에게 맞는 금연 전략은?',
     toolsSub: '숨참기 챌린지 · 아낀 돈 스노우볼',
     // 하루에 아끼는 돈
     moneyPerDay: () => (getNum('cigsPerDay', CONFIG.cigsPerDay) / 20) * getNum('pricePerPack', CONFIG.pricePerPack),
@@ -29,6 +33,10 @@ const MODES = {
     failLabel: '금주 실패',
     guideHref: 'guide-drink.html',
     guideLabel: '금주 정보',
+    testHref: 'test.html',
+    testEmoji: '🍻',
+    testTitle: '술자리 성격 테스트',
+    testSub: '나는 어떤 타입이었을까?',
     toolsSub: '아낀 돈 스노우볼 · 신체 나이',
     moneyPerDay: () => (getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7) * getNum('costPerDrink', CONFIG.costPerDrink),
     countPerDay: () => getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7,
@@ -181,6 +189,14 @@ function milestoneMessage(day) {
 
 const $ = (id) => document.getElementById(id);
 
+// 배포 직후 브라우저가 새 HTML 과 캐시에 남은 옛 app.js 를 섞어 쓰는 순간이 있다.
+// 그때 없는 요소를 만지다 오류가 나면 그 뒤의 render() 까지 멈춰서 일수와
+// 아낀 돈이 0으로 보인다(저장된 값은 멀쩡한데도). 화면 장식용 요소는 이걸 거쳐 쓴다.
+function setIfPresent(id, apply) {
+  const el = $(id);
+  if (el) apply(el);
+}
+
 let renderedDay = null;
 
 // 모드에 따라 달라지는 문구를 한 번에 갈아끼운다
@@ -194,10 +210,13 @@ function applyModeLabels() {
   // 아래 메뉴의 정보 링크도 탭에 맞춰 바뀐다
   $('guideLink').href = m.guideHref;
   $('guideLink').textContent = m.guideLabel;
-  // 두 테스트 모두 항상 열어두고, 지금 탭에 맞는 쪽만 강조한다
-  $('promoTestSmoke').classList.toggle('is-current', mode === 'smoke');
-  $('promoTestDrink').classList.toggle('is-current', mode === 'drink');
-  $('toolsPromoSub').textContent = m.toolsSub;
+  // 심리테스트는 탭에 맞는 것 하나만 건다. 미니 도구는 두 탭 모두에 둔다.
+  // HTML 과 이 파일의 배포 시점이 어긋나도 카운터가 멈추지 않도록 요소를 확인하고 쓴다.
+  setIfPresent('testPromo', (el) => { el.href = m.testHref; });
+  setIfPresent('testPromoEmoji', (el) => { el.textContent = m.testEmoji; });
+  setIfPresent('testPromoTitle', (el) => { el.textContent = m.testTitle; });
+  setIfPresent('testPromoSub', (el) => { el.textContent = m.testSub; });
+  setIfPresent('toolsPromoSub', (el) => { el.textContent = m.toolsSub; });
   document.body.dataset.mode = mode;
   setSeg('modeTabs', mode);
 }
