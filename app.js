@@ -665,6 +665,9 @@ function isStandalone() {
 function initInstallBanner() {
   const standalone = isStandalone();
 
+  // 브라우저로 열었을 때만 카운터 아래에 소개 글을 펼친다
+  document.body.classList.toggle('web', !standalone);
+
   // 설치한 사람에게는 남은 할 일이 '자동 실행 켜기'뿐이다
   $('ghostBtn').textContent = standalone ? '자동 실행 설정' : '데스크탑에 설치';
   $('ghostBtn').href = standalone ? 'install.html#autostart' : 'install.html';
