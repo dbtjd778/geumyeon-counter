@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260809b">
+<link rel="stylesheet" href="style.css?v=20260818a">
 <link rel="canonical" href="https://todayquit.com/">
 <meta property="og:site_name" content="오늘만 하고 끊을게">
 <meta property="og:type" content="website">
@@ -85,14 +85,25 @@
     <p id="insightSource" class="insight-source hidden"></p>
   </section>
 
-  <a id="testPromo" class="test-promo hidden" href="test.html">
-    <span class="test-promo-emoji">🍻</span>
-    <span class="test-promo-text">
-      <strong>술자리 성격 테스트</strong>
-      <em>나는 어떤 타입이었을까?</em>
-    </span>
-    <span class="test-promo-go">→</span>
-  </a>
+  <div class="promo-stack">
+    <a id="testPromo" class="test-promo" href="test.html">
+      <span id="testPromoEmoji" class="test-promo-emoji">🍻</span>
+      <span class="test-promo-text">
+        <strong id="testPromoTitle">술자리 성격 테스트</strong>
+        <em id="testPromoSub">나는 어떤 타입이었을까?</em>
+      </span>
+      <span class="test-promo-go">→</span>
+    </a>
+
+    <a class="test-promo promo-tools" href="tools.html">
+      <span class="test-promo-emoji">🫁</span>
+      <span class="test-promo-text">
+        <strong>미니 도구</strong>
+        <em id="toolsPromoSub">숨참기 챌린지 · 아낀 돈 스노우볼</em>
+      </span>
+      <span class="test-promo-go">→</span>
+    </a>
+  </div>
 
   <footer class="bottom">
     <span id="startInfo"></span>
@@ -227,6 +238,11 @@
       <h2>🫁 숨참기 · 📈 스노우볼 · 🏥 신체 나이</h2>
       <p>숨을 얼마나 참는지 재보는 챌린지, 담뱃값과 술값을 투자했다면 얼마가 됐을지 계산하는 복리 계산기, 생활습관으로 보는 추정 신체 나이. 세 가지가 한 페이지에 있습니다.</p>
       <span class="post-more">해보기</span>
+    </a>
+    <a class="post-card" href="test-smoke.html">
+      <h2>🚬 흡연 &amp; 금연 성향 테스트</h2>
+      <p>담배를 대하는 습관 10가지로 알아보는 나의 유형. 철혈의 금연 지휘관부터 고민하는 철학자 스모커까지, 유형별로 잘 맞는 금연 전략이 함께 나옵니다.</p>
+      <span class="post-more">테스트 하기</span>
     </a>
     <a class="post-card" href="test.html">
       <h2>🍻 술자리 성격 테스트</h2>

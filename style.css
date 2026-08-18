@@ -408,12 +408,14 @@ body[data-mode="drink"] .only-smoke { display: none; }
   color: #5f7280;
 }
 
-/* 금주 탭에서 통계 아래에 붙는 심리테스트 배너 (통계 두 칸과 같은 폭) */
+/* 통계 아래에 붙는 안내 배너 두 장 (통계 두 칸과 같은 폭) */
+.promo-stack { display: grid; gap: 7px; }
+
 .test-promo {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 11px 14px;
+  padding: 9px 13px;
   border: 1px solid rgba(34, 211, 238, 0.32);
   border-radius: 14px;
   background: linear-gradient(150deg, rgba(34, 211, 238, 0.13), rgba(74, 222, 128, 0.05));
@@ -447,6 +449,23 @@ body[data-mode="drink"] .only-smoke { display: none; }
 }
 
 .test-promo-go { flex: 0 0 auto; font-size: 15px; color: var(--accent-2); }
+
+/* 미니 도구 배너는 심리테스트와 구분되게 초록 계열로 */
+.promo-tools {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: linear-gradient(150deg, rgba(74, 222, 128, 0.12), rgba(34, 211, 238, 0.04));
+}
+
+.promo-tools:hover { border-color: rgba(74, 222, 128, 0.6); }
+
+.promo-tools .test-promo-go { color: var(--accent); }
+
+/* 테스트 결과 아래에서 다른 테스트로 넘어가는 배너 */
+.test-cross { margin: 26px 0 0; padding: 14px 16px; }
+
+.test-cross .test-promo-text strong { font-size: 14px; }
+
+.test-cross .test-promo-emoji { font-size: 24px; }
 
 /* ===== 하단 ===== */
 .bottom {
@@ -1153,6 +1172,26 @@ body[data-mode="drink"] .only-smoke { display: none; }
 
 .result-desc-card h2 { margin: 0 0 10px; padding: 0; font-size: 15px; }
 .result-desc-card p { margin: 0; font-size: 14.5px; line-height: 1.85; }
+
+/* 유형별 금연 꿀팁 한 줄 */
+.result-tip {
+  margin-top: 12px;
+  padding: 16px 20px;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 16px;
+  background: linear-gradient(150deg, rgba(74, 222, 128, 0.12), rgba(34, 211, 238, 0.04));
+}
+
+.result-tip-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.result-tip p { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--text); }
 
 .result-actions { display: grid; gap: 10px; margin-top: 20px; }
 .result-actions .test-cta { margin-top: 0; }
