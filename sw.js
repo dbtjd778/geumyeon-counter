@@ -3,7 +3,7 @@
 // HTML/JS/CSS는 '네트워크 우선'이다. 캐시 우선으로 두면 파일을 고쳐 배포해도
 // 사용자가 두 번 새로고침해야 새 화면을 보게 되기 때문. 인터넷이 없을 때만
 // 캐시로 떨어진다. 아이콘처럼 잘 안 바뀌는 파일은 캐시 우선을 유지한다.
-const CACHE = 'qs-20260819a';
+const CACHE = 'qs-20260820a';
 
 const ASSETS = [
   './',
@@ -25,6 +25,12 @@ const ASSETS = [
   './alcohol-medicine.html',
   './solo-drinking.html',
   './alcohol-weight.html',
+  './skin.html',
+  './sleep.html',
+  './smell.html',
+  './flush.html',
+  './exercise.html',
+  './nonalcohol.html',
   './tools.html',
   './tools.js',
   './test.html',
