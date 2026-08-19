@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>금연·금주 미니 도구 — 오늘만 하고 끊을게</title>
-<meta name="description" content="숨참기 챌린지, 담뱃값·술값을 투자했다면 계산기, 생활습관으로 보는 추정 신체 나이. 금연과 금주를 이어가는 데 도움이 되는 미니 도구 세 가지.">
+<meta name="description" content="숨참기 챌린지와 생활습관으로 보는 추정 신체 나이. 금연과 금주를 이어가는 데 도움이 되는 미니 도구 두 가지.">
 <meta name="theme-color" content="#070b11">
 <link rel="icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=20260818f">
+<link rel="stylesheet" href="style.css?v=20260819a">
 <link rel="canonical" href="https://todayquit.com/tools.html">
 <meta property="og:site_name" content="오늘만 하고 끊을게">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://todayquit.com/tools.html">
 <meta property="og:title" content="금연·금주 미니 도구 — 오늘만 하고 끊을게">
-<meta property="og:description" content="숨참기 챌린지, 담뱃값·술값을 투자했다면 계산기, 생활습관으로 보는 추정 신체 나이.">
+<meta property="og:description" content="숨참기 챌린지와 생활습관으로 보는 추정 신체 나이.">
 <meta property="og:image" content="https://todayquit.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211829862421684" crossorigin="anonymous"></script>
@@ -39,11 +39,12 @@
   <h1>금연·금주 미니 도구</h1>
   <p class="updated">최종 수정일: 2026년 8월 18일</p>
 
-  <p>버티는 데 도움이 되는 작은 도구 세 가지입니다. 전부 브라우저 안에서만 계산되며 아무것도 저장하거나 전송하지 않습니다.</p>
+  <p>버티는 데 도움이 되는 작은 도구 두 가지입니다. 전부 브라우저 안에서만 계산되며 아무것도 저장하거나 전송하지 않습니다.</p>
+
+  <p>아낀 돈이 앞으로 얼마나 쌓이는지는 <a href="index.html">카운터</a> 화면에서 바로 볼 수 있습니다. 1개월·6개월·1년·5년 뒤의 금액과 각 시점까지 남은 시간이 함께 나옵니다.</p>
 
   <div id="toolTabs" class="tool-tabs" data-value="breath">
     <button type="button" data-v="breath">🫁 숨참기</button>
-    <button type="button" data-v="money">📈 스노우볼</button>
     <button type="button" data-v="age">🏥 신체 나이</button>
   </div>
 
@@ -119,71 +120,7 @@
     </div>
   </section>
 
-  <!-- ===== 탭 2: 스노우볼 계산기 ===== -->
-  <section id="panelMoney" class="tool-panel hidden">
-    <h2>담뱃값·술값을 투자했다면</h2>
-
-    <p>끊어서 아낀 돈을 <strong>매달 그대로 투자했다면</strong> 얼마가 되는지 계산합니다. 담뱃값은 사라지지만 투자한 돈은 남습니다. 그 차이를 눈으로 보는 도구입니다.</p>
-
-    <div class="field">
-      <span>무엇을 끊나요</span>
-      <div id="moneyKind" class="seg" data-value="smoke">
-        <button type="button" data-v="smoke">금연</button>
-        <button type="button" data-v="drink">금주</button>
-      </div>
-    </div>
-
-    <div class="only-smoke-tool">
-      <div class="field-row">
-        <label class="field">
-          <span>하루 몇 갑</span>
-          <input id="mPacks" type="number" min="0.1" max="10" step="0.1" value="1" inputmode="decimal">
-        </label>
-        <label class="field">
-          <span>한 갑 가격 (원)</span>
-          <input id="mPackPrice" type="number" min="0" step="100" value="4500" inputmode="numeric">
-        </label>
-      </div>
-    </div>
-
-    <div class="only-drink-tool">
-      <div class="field-row">
-        <label class="field">
-          <span>일주일에 몇 번</span>
-          <input id="mTimes" type="number" min="0.5" max="21" step="0.5" value="3" inputmode="decimal">
-        </label>
-        <label class="field">
-          <span>한 번에 쓰던 돈 (원)</span>
-          <input id="mCost" type="number" min="0" step="1000" value="30000" inputmode="numeric">
-        </label>
-      </div>
-    </div>
-
-    <label class="field">
-      <span>연평균 수익률 (%)</span>
-      <input id="mRate" type="number" min="0" max="30" step="0.5" value="8" inputmode="decimal">
-    </label>
-    <p class="field-note">기본값 8%는 S&amp;P500의 장기 연평균 수익률로 흔히 인용되는 값입니다. 미래 수익률을 보장하는 숫자가 아닙니다.</p>
-
-    <div class="money-summary">
-      <div class="stat">
-        <div class="stat-label">한 달에 아끼는 돈</div>
-        <div id="mMonthly" class="stat-value">137,000원</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">1년에 아끼는 돈</div>
-        <div id="mYearly" class="stat-value">1,643,000원</div>
-      </div>
-    </div>
-
-    <div id="moneyCards" class="money-cards"></div>
-
-    <div class="notice">
-      <p>매달 같은 금액을 넣고 수익률이 매년 일정하다고 가정한 <strong>단순 계산</strong>입니다. 실제 투자는 손실이 날 수 있고, 세금과 수수료, 물가 상승은 반영하지 않았습니다. 이 계산은 정보 제공일 뿐 <strong>투자 권유나 자문이 아닙니다.</strong></p>
-    </div>
-  </section>
-
-  <!-- ===== 탭 3: 추정 신체 나이 ===== -->
+  <!-- ===== 탭 2: 추정 신체 나이 ===== -->
   <section id="panelAge" class="tool-panel hidden">
     <h2>생활습관으로 보는 추정 신체 나이</h2>
 
@@ -290,7 +227,7 @@
   </footer>
 </div>
 
-<script src="tools.js?v=20260818f"></script>
+<script src="tools.js?v=20260819a"></script>
 </body>
 </html>
 

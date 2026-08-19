@@ -16,7 +16,7 @@ const MODES = {
     testEmoji: '🚬',
     testTitle: '흡연 & 금연 성향 테스트',
     testSub: '나에게 맞는 금연 전략은?',
-    toolsSub: '숨참기 챌린지 · 아낀 돈 스노우볼',
+    toolsSub: '숨참기 챌린지 · 추정 신체 나이',
     // 하루에 아끼는 돈
     moneyPerDay: () => (getNum('cigsPerDay', CONFIG.cigsPerDay) / 20) * getNum('pricePerPack', CONFIG.pricePerPack),
     // 하루에 줄어드는 개수와 그 단위
@@ -37,7 +37,7 @@ const MODES = {
     testEmoji: '🍻',
     testTitle: '술자리 성격 테스트',
     testSub: '나는 어떤 타입이었을까?',
-    toolsSub: '아낀 돈 스노우볼 · 신체 나이',
+    toolsSub: '숨참기 챌린지 · 추정 신체 나이',
     moneyPerDay: () => (getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7) * getNum('costPerDrink', CONFIG.costPerDrink),
     countPerDay: () => getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7,
     countUnit: '번',
@@ -256,7 +256,117 @@ function render() {
     ? `시작 ${start.getFullYear()}.${start.getMonth() + 1}.${start.getDate()}`
     : '시작일 미설정';
 
+  renderSnowball();
   renderInsight();
+}
+
+// ===== 이대로 가면 얼마가 모이는지 =====
+// 시작일로부터 1개월/6개월/1년/5년이 되는 날짜를 달력 기준으로 잡고,
+// 그날까지 쌓이는 절약액과 아직 남은 시간을 같이 보여준다.
+
+const HORIZONS = [
+  { label: '1개월', months: 1 },
+  { label: '6개월', months: 6 },
+  { label: '1년', months: 12 },
+  { label: '5년', months: 60 },
+];
+
+// 시작일 + n개월. 8월 31일처럼 다음 달에 같은 날이 없으면 그 달의 마지막 날로 맞춘다.
+function addMonths(date, months) {
+  const d = new Date(date.getFullYear(), date.getMonth() + months, 1);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(date.getDate(), lastDay));
+  return d;
+}
+
+// 시작일을 1일째로 볼 때 그 날짜가 며칠째인지
+function dayNumberOf(start, date) {
+  return Math.floor((dayStamp(date) - dayStamp(start)) / 86400000) + 1;
+}
+
+// 400x600 앱 창에 넣어야 해서 만 단위로 줄여 쓴다
+function shortWon(value) {
+  const v = Math.round(value);
+  if (v >= 100000000) {
+    const eok = v / 100000000;
+    return (eok >= 10 ? Math.round(eok) : Math.round(eok * 10) / 10) + '억';
+  }
+  if (v >= 10000) return comma(Math.round(v / 10000)) + '만';
+  return comma(v) + '원';
+}
+
+function renderSnowball() {
+  const box = $('snowball');
+  if (!box) return;                     // 옛 HTML 과 섞여 돌아도 죽지 않게
+
+  const start = getStartDate();
+  const perDay = M().moneyPerDay();
+
+  // 시작일이 없거나 아낄 돈이 0이면 보여줄 것이 없다
+  if (!start || !(perDay > 0)) {
+    box.classList.add('hidden');
+    return;
+  }
+  box.classList.remove('hidden');
+
+  const now = new Date();
+  const row = $('snowRow');
+  row.textContent = '';
+  let next = null;
+
+  for (const h of HORIZONS) {
+    const target = addMonths(start, h.months);
+    const amount = perDay * dayNumberOf(start, target);
+    const leftMs = target.getTime() - now.getTime();
+    const done = leftMs <= 0;
+    if (!done && !next) next = { label: h.label, amount, target };
+
+    const cell = document.createElement('div');
+    cell.className = 'snow-cell' + (done ? ' done' : '');
+    cell.title = `${h.label} 뒤 ${comma(Math.round(amount))}원`;
+
+    const label = document.createElement('span');
+    label.className = 'snow-label';
+    label.textContent = h.label;
+
+    const money = document.createElement('span');
+    money.className = 'snow-amount';
+    money.textContent = shortWon(amount);
+
+    const left = document.createElement('span');
+    left.className = 'snow-left';
+    left.textContent = done ? '달성' : 'D-' + Math.max(1, Math.ceil(leftMs / 86400000));
+
+    cell.append(label, money, left);
+    row.appendChild(cell);
+  }
+
+  renderSnowNext(next);
+}
+
+// 아직 안 지난 가장 가까운 구간까지 남은 시간을 분 단위로
+function renderSnowNext(next) {
+  const el = $('snowNext');
+  if (!el) return;
+
+  renderSnowNext.next = next;
+
+  if (!next) {
+    el.textContent = '5년까지 전부 지났어요. 대단합니다.';
+    return;
+  }
+
+  const left = Math.max(next.target.getTime() - Date.now(), 0);
+  const days = Math.floor(left / 86400000);
+  const hours = Math.floor((left % 86400000) / 3600000);
+  const minutes = Math.floor((left % 3600000) / 60000);
+
+  const parts = [];
+  if (days) parts.push(`${comma(days)}일`);
+  if (days || hours) parts.push(`${hours}시간`);
+  parts.push(`${minutes}분`);
+
+  el.innerHTML = `<strong>${next.label}</strong>까지 ${parts.join(' ')} 남았어요 · 그때 <strong>${comma(Math.round(next.amount))}원</strong>`;
 }
 
 // 금연 탭에서 성별·나이를 넣은 사람에게만 보여주는 추가 정보
@@ -724,6 +834,15 @@ if (getStartDate()) {
   fillOnboarding();
   openOverlay('onboarding');
 }
+
+// 남은 시간은 분 단위로 보여주므로 30초마다 다시 그린다.
+// 구간을 막 넘긴 경우에는 전체를 다시 계산해야 다음 구간으로 넘어간다.
+setInterval(() => {
+  const next = renderSnowNext.next;
+  if (!next) return;
+  if (next.target.getTime() - Date.now() <= 0) renderSnowball();
+  else renderSnowNext(next);
+}, 30000);
 
 // 켜둔 채로 자정이 지나면 자동으로 갱신
 setInterval(() => {

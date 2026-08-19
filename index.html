@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260818f">
+<link rel="stylesheet" href="style.css?v=20260819a">
 <link rel="canonical" href="https://todayquit.com/">
 <meta property="og:site_name" content="오늘만 하고 끊을게">
 <meta property="og:type" content="website">
@@ -79,6 +79,12 @@
     </div>
   </section>
 
+  <!-- 이대로 가면 얼마가 모이는지 (구간별 절약액 + 다음 구간까지 남은 시간) -->
+  <section id="snowball" class="snowball hidden">
+    <div id="snowRow" class="snow-row"></div>
+    <p id="snowNext" class="snow-next"></p>
+  </section>
+
   <section id="insight" class="insight hidden">
     <p id="insightAvg" class="insight-line hidden"></p>
     <p id="insightLife" class="insight-line hidden"></p>
@@ -99,7 +105,7 @@
       <span class="test-promo-emoji">🫁</span>
       <span class="test-promo-text">
         <strong>미니 도구</strong>
-        <em id="toolsPromoSub">숨참기 챌린지 · 아낀 돈 스노우볼</em>
+        <em id="toolsPromoSub">숨참기 챌린지 · 추정 신체 나이</em>
       </span>
       <span class="test-promo-go">→</span>
     </a>
@@ -280,8 +286,8 @@
   <h3>미니 도구</h3>
   <div class="card-list">
     <a class="post-card" href="tools.html">
-      <h2>🫁 숨참기 · 📈 스노우볼 · 🏥 신체 나이</h2>
-      <p>숨을 얼마나 참는지 재보는 챌린지, 담뱃값과 술값을 투자했다면 얼마가 됐을지 계산하는 복리 계산기, 생활습관으로 보는 추정 신체 나이. 세 가지가 한 페이지에 있습니다.</p>
+      <h2>🫁 숨참기 · 🏥 추정 신체 나이</h2>
+      <p>숨을 얼마나 참는지 재보는 챌린지와, 생활습관 6문항으로 보는 폐·간의 추정 나이. 두 가지가 한 페이지에 있고 결과에 실제 회복 일정표가 함께 나옵니다.</p>
       <span class="post-more">해보기</span>
     </a>
     <a class="post-card" href="test-smoke.html">
@@ -478,8 +484,8 @@
   </div>
 </div>
 
-<script src="config.js?v=20260818f"></script>
-<script src="app.js?v=20260818f"></script>
+<script src="config.js?v=20260819a"></script>
+<script src="app.js?v=20260819a"></script>
 </body>
 </html>
 
