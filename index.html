@@ -3,15 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>오늘만 하고 끊을게 — 금연·금주 일수 카운터</title>
-<meta name="description" content="금연과 금주 일수를 자동으로 세고, 목표를 넘길 때마다 축하해주는 카운터">
-<meta name="theme-color" content="#070b11">
+<title>오늘만 하고 끊을게 — 담배·술·커피·릴스, 끊은 지 며칠째인지 세어주는 카운터</title>
+<meta name="description" content="담배, 술, 커피, 탄산, 밀가루, 릴스·쇼츠, 게임, 택시, 욕, 늦잠. 끊고 싶은 습관을 고르면 며칠째인지와 그동안 아낀 돈, 되찾은 시간을 자동으로 세어줍니다. 가입도 설치도 필요 없습니다.">
+<meta name="theme-color" content="#f4f6f3">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="style.css?v=20260820a">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20260905a">
 <link rel="canonical" href="https://todayquit.com/">
 <!-- 네이버 서치어드바이저 사이트 소유 확인 (지우면 소유확인이 풀린다) -->
 <meta name="naver-site-verification" content="3288d9054a2f2809c566e74cf14be89304efa40a" />
@@ -19,15 +22,42 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://todayquit.com/">
-<meta property="og:title" content="오늘만 하고 끊을게 — 금연·금주 일수 카운터">
-<meta property="og:description" content="금연과 금주 일수를 자동으로 세고, 목표를 넘길 때마다 축하해주는 카운터">
+<meta property="og:title" content="오늘만 하고 끊을게 — 끊은 지 며칠째인지 세어주는 카운터">
+<meta property="og:description" content="담배, 술, 커피, 릴스, 게임, 택시… 끊고 싶은 습관을 고르면 며칠째인지와 아낀 돈, 되찾은 시간을 자동으로 세어줍니다.">
 <meta property="og:image" content="https://todayquit.com/icon-512.png">
 <meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "오늘만 하고 끊을게",
+  "alternateName": "todayquit",
+  "url": "https://todayquit.com/",
+  "inLanguage": "ko",
+  "description": "끊고 싶은 습관을 고르면 며칠째인지와 그동안 아낀 돈, 되찾은 시간을 자동으로 세어주는 카운터"
+}
+</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211829862421684" crossorigin="anonymous"></script>
 </head>
 <body class="app">
 
 <canvas id="confetti"></canvas>
+
+<!-- ===== 사이트 상단 (브라우저로 열었을 때만) ===== -->
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="site-brand" href="index.html"><span class="site-mark">◐</span>오늘만 하고 끊을게</a>
+    <nav class="site-nav">
+      <a href="index.html" aria-current="page">카운터</a>
+      <a href="guide.html">금연 정보</a>
+      <a href="guide-drink.html">금주 정보</a>
+      <a href="test.html">테스트</a>
+      <a href="tools.html">도구</a>
+      <a href="about.html">소개</a>
+    </nav>
+    <a class="site-cta" href="install.html">컴퓨터에 설치</a>
+  </div>
+</header>
 
 <div id="installBanner" class="install-banner hidden">
   <a class="install-banner-link" href="install.html">
@@ -37,340 +67,242 @@
   <button id="bannerClose" class="install-banner-close" type="button" title="닫기" aria-label="배너 닫기">×</button>
 </div>
 
-<main id="widget" class="widget">
-  <header class="top">
-    <div id="modeTabs" class="tabs" data-value="smoke">
-      <button type="button" data-v="smoke">금연</button>
-      <button type="button" data-v="drink">금주</button>
+<!-- ===== 첫 화면: 문장 + 살아 있는 카운터 ===== -->
+<section class="hero">
+  <div class="hero-copy">
+    <h1 class="hero-title"><span class="strike">오늘만</span> 하고 끊을게.</h1>
+    <p class="hero-lead">그 '오늘'이 며칠째인지 세어드립니다.</p>
+    <p class="hero-sub">담배, 술, 커피, 릴스, 게임, 택시. 끊고 싶은 습관 하나를 고르면 며칠째인지, 그동안 아낀 돈과 되찾은 시간이 저절로 쌓입니다. 가입도 앱 설치도 필요 없습니다.</p>
+    <p id="heroCount" class="hero-count hidden"></p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#hub">끊을 습관 고르기</a>
+      <a class="btn btn-ghost" href="install.html">컴퓨터 켤 때 자동으로 뜨게</a>
     </div>
-    <span class="top-right">
-      <span id="today"></span>
-      <button id="settingsBtn" class="icon-btn" type="button" title="설정">설정</button>
-    </span>
-  </header>
-
-  <section class="counter">
-    <div class="ring-wrap">
-      <svg class="ring" viewBox="0 0 200 200">
-        <defs>
-          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#4ade80" />
-            <stop offset="55%" stop-color="#34d399" />
-            <stop offset="100%" stop-color="#22d3ee" />
-          </linearGradient>
-        </defs>
-        <circle class="ring-bg" cx="100" cy="100" r="88" />
-        <circle id="ringFg" class="ring-fg" cx="100" cy="100" r="88" />
-      </svg>
-      <div class="ring-center">
-        <div id="dayNum" class="day-num">0</div>
-        <div class="day-unit">일째</div>
-      </div>
-    </div>
-    <p id="nextGoal" class="next-goal"></p>
-  </section>
-
-  <section class="stats">
-    <div class="stat">
-      <div class="stat-label">아낀 돈</div>
-      <div id="saved" class="stat-value">0원</div>
-    </div>
-    <div class="stat">
-      <div id="countLabel" class="stat-label">안 피운 담배</div>
-      <div id="notSmoked" class="stat-value">0개비</div>
-    </div>
-  </section>
-
-  <!-- 이대로 가면 얼마가 모이는지 (구간별 절약액 + 다음 구간까지 남은 시간) -->
-  <section id="snowball" class="snowball hidden">
-    <div id="snowRow" class="snow-row"></div>
-    <p id="snowNext" class="snow-next"></p>
-  </section>
-
-  <section id="insight" class="insight hidden">
-    <p id="insightAvg" class="insight-line hidden"></p>
-    <p id="insightLife" class="insight-line hidden"></p>
-    <p id="insightSource" class="insight-source hidden"></p>
-  </section>
-
-  <div class="promo-stack">
-    <a id="testPromo" class="test-promo" href="test-smoke.html">
-      <span id="testPromoEmoji" class="test-promo-emoji">🚬</span>
-      <span class="test-promo-text">
-        <strong id="testPromoTitle">흡연 &amp; 금연 성향 테스트</strong>
-        <em id="testPromoSub">나에게 맞는 금연 전략은?</em>
-      </span>
-      <span class="test-promo-go">→</span>
-    </a>
-
-    <a class="test-promo promo-tools" href="tools.html">
-      <span class="test-promo-emoji">🫁</span>
-      <span class="test-promo-text">
-        <strong>미니 도구</strong>
-        <em id="toolsPromoSub">숨참기 챌린지 · 추정 신체 나이</em>
-      </span>
-      <span class="test-promo-go">→</span>
-    </a>
+    <p class="hero-note">입력한 값은 이 브라우저 안에만 저장됩니다. 서버로 가지 않습니다.</p>
   </div>
 
-  <footer class="bottom">
-    <span id="startInfo"></span>
-    <span class="bottom-btns">
-      <a id="ghostBtn" class="ghost-btn" href="install.html">데스크탑에 설치</a>
-      <button id="failBtn" class="danger" type="button">금연 실패</button>
-    </span>
-  </footer>
-</main>
+  <!-- 카운터 본체. 설치된 앱 창에서는 이것만 보인다. -->
+  <main id="widget" class="widget">
+    <header class="top">
+      <button id="habitBtn" class="habit-btn" type="button" aria-haspopup="true" aria-expanded="false" title="다른 습관 세기">
+        <span id="habitEmoji" class="habit-emoji">🚬</span>
+        <span id="habitName" class="habit-name">담배</span>
+        <span class="habit-caret" aria-hidden="true">▾</span>
+      </button>
+      <div id="habitMenu" class="habit-menu hidden" role="menu"></div>
+      <span class="top-right">
+        <span id="today"></span>
+        <button id="settingsBtn" class="icon-btn" type="button" title="설정">설정</button>
+      </span>
+    </header>
 
-<nav class="sitenav">
-  <a id="guideLink" href="guide.html">금연 정보</a>
-  <a href="tools.html">미니 도구</a>
-  <a href="test.html">심리테스트</a>
-  <a href="about.html">소개</a>
-  <a href="privacy.html">개인정보처리방침</a>
-  <a href="contact.html">문의</a>
-</nav>
+    <section class="counter">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1e6b4b" />
+              <stop offset="100%" stop-color="#3ba776" />
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="100" cy="100" r="88" />
+          <circle id="ringFg" class="ring-fg" cx="100" cy="100" r="88" />
+        </svg>
+        <div class="ring-center">
+          <div id="dayNum" class="day-num">0</div>
+          <div class="day-unit">일째</div>
+        </div>
+      </div>
+      <p id="nextGoal" class="next-goal"></p>
+    </section>
 
-<!-- 브라우저로 들어온 사람에게만 보이는 소개 영역. 앱으로 설치해 열면 숨겨진다. -->
+    <section class="stats">
+      <div class="stat">
+        <div id="mainLabel" class="stat-label">아낀 돈</div>
+        <div id="saved" class="stat-value">0원</div>
+      </div>
+      <div class="stat">
+        <div id="countLabel" class="stat-label">안 피운 담배</div>
+        <div id="notSmoked" class="stat-value">0개비</div>
+      </div>
+    </section>
+
+    <!-- 이대로 가면 얼마가 모이는지 -->
+    <section id="snowball" class="snowball hidden">
+      <div id="snowRow" class="snow-row"></div>
+      <p id="snowNext" class="snow-next"></p>
+    </section>
+
+    <section id="insight" class="insight hidden">
+      <p id="insightAvg" class="insight-line hidden"></p>
+      <p id="insightLife" class="insight-line hidden"></p>
+      <p id="insightSource" class="insight-source hidden"></p>
+    </section>
+
+    <div class="promo-stack">
+      <a id="testPromo" class="test-promo" href="test-smoke.html">
+        <span id="testPromoEmoji" class="test-promo-emoji">🚬</span>
+        <span class="test-promo-text">
+          <strong id="testPromoTitle">흡연 &amp; 금연 성향 테스트</strong>
+          <em id="testPromoSub">나에게 맞는 금연 전략은?</em>
+        </span>
+        <span class="test-promo-go">→</span>
+      </a>
+      <a class="test-promo promo-tools" href="tools.html">
+        <span class="test-promo-emoji">🫁</span>
+        <span class="test-promo-text">
+          <strong>미니 도구</strong>
+          <em>숨참기 챌린지 · 추정 신체 나이</em>
+        </span>
+        <span class="test-promo-go">→</span>
+      </a>
+    </div>
+
+    <footer class="bottom">
+      <span class="bottom-left">
+        <span id="startInfo"></span>
+        <a id="guideLink" class="bottom-link" href="guide.html">금연 정보</a>
+      </span>
+      <span class="bottom-btns">
+        <a id="ghostBtn" class="ghost-btn" href="install.html">데스크탑에 설치</a>
+        <button id="failBtn" class="danger" type="button">금연 실패</button>
+      </span>
+    </footer>
+  </main>
+</section>
+
+<!-- ===== 세는 중인 습관 / 전체 목록 ===== -->
+<div id="activeStrip" class="active-strip hidden"></div>
+
+<section id="hub" class="hub">
+  <div class="hub-head">
+    <h2>무엇을 끊을까요</h2>
+    <p>하나를 고르면 위의 카운터가 그 습관으로 바뀝니다. 여러 개를 동시에 세어도 되고, 각각 따로 저장됩니다.</p>
+  </div>
+  <div id="habitGrid" class="hub-grid"></div>
+</section>
+
+<!-- ===== 소개 · 읽을거리 · FAQ (브라우저에서만) ===== -->
 <section id="homeContent" class="page home-content">
-  <h2>오늘이 며칠째인지 세어주는 곳</h2>
 
-  <p><strong>오늘만 하고 끊을게</strong>는 금연이나 금주를 시작한 날부터 며칠이 지났는지 세어주고, 그동안 아낀 돈과 넘긴 횟수를 보여주는 웹 앱입니다. 가입도 설치도 필요 없고, 위의 카운터에 시작일만 넣으면 바로 시작됩니다.</p>
-
-  <p>이름은 담배나 술을 끊어보려 한 사람이라면 한 번쯤 해봤을 그 말에서 가져왔습니다. <strong>"오늘만 하고 끊을게."</strong> 그리고 대부분은 다음 날에도 같은 말을 합니다. 이 사이트는 그 말을 해본 사람을 혼내는 곳이 아니라, 오늘 하루를 넘긴 사람에게 그게 며칠째인지 알려주는 곳입니다.</p>
-
-  <h3>세 가지만 기억하면 됩니다</h3>
-
-  <div class="home-steps">
-    <div class="home-step">
-      <span class="home-step-num">1</span>
-      <div>
-        <strong>시작일을 넣습니다</strong>
-        <p>담배 한 갑 가격과 하루 흡연량(또는 술을 마시던 빈도와 한 번에 쓰던 돈)을 함께 넣으면 절약 금액까지 계산됩니다. 딱 한 번만 하면 됩니다.</p>
-      </div>
+  <div class="how">
+    <div class="how-item">
+      <strong>시작일만 넣습니다</strong>
+      <p>하루에 얼마나 썼는지(잔 수, 갑 수, 분)를 함께 넣으면 아낀 돈이나 되찾은 시간까지 계산됩니다. 딱 한 번만 하면 됩니다.</p>
     </div>
-    <div class="home-step">
-      <span class="home-step-num">2</span>
-      <div>
-        <strong>가끔 열어봅니다</strong>
-        <p>며칠 열지 않아도 숫자가 밀리지 않습니다. 일수를 저장해두고 더하는 방식이 아니라, 열 때마다 시작일과 오늘 날짜의 차이를 다시 계산하기 때문입니다.</p>
-      </div>
+    <div class="how-item">
+      <strong>가끔 열어봅니다</strong>
+      <p>며칠 안 열어도 숫자가 밀리지 않습니다. 열 때마다 시작일과 오늘 날짜의 차이를 다시 계산하기 때문입니다.</p>
     </div>
-    <div class="home-step">
-      <span class="home-step-num">3</span>
-      <div>
-        <strong>10일마다 축하를 받습니다</strong>
-        <p>10일, 20일, 30일마다 축하 효과가 나오고 100일 단위에는 더 크게 나옵니다. 매일 뜨면 질리니까 그 날에만 한 번씩 나옵니다.</p>
-      </div>
+    <div class="how-item">
+      <strong>10일마다 축하를 받습니다</strong>
+      <p>10일, 20일, 30일마다 축하가 나오고 100일 단위에는 더 크게 나옵니다. 그날 한 번만 나옵니다.</p>
+    </div>
+    <div class="how-item">
+      <strong>실패하면 다시 시작합니다</strong>
+      <p>실패 버튼을 누르면 다시 시작할 날짜를 고를 수 있습니다. 몇 번째 시도인지는 묻지 않습니다.</p>
     </div>
   </div>
 
-  <h3>계산은 이렇게 합니다</h3>
+  <h2 class="section-title">읽을거리</h2>
+  <p class="section-lead">끊는 동안 도움이 되는 것만 골라 정리했습니다. 건강 관련 수치는 국가암정보센터, 질병관리청 국가건강정보포털 등 <strong>공공기관이 공개한 1차 자료</strong>를 확인하고 각 글 끝에 출처를 밝혀두었습니다.</p>
 
-  <div class="table-scroll">
-    <table>
-      <tr>
-        <th>항목</th>
-        <th>계산 방식</th>
-      </tr>
-      <tr>
-        <td>일수</td>
-        <td>시작일을 1일째로 두고 오늘 날짜와의 차이</td>
-      </tr>
-      <tr>
-        <td>안 피운 담배</td>
-        <td>일수 × 하루 흡연량(개비)</td>
-      </tr>
-      <tr>
-        <td>아낀 돈 (금연)</td>
-        <td>일수 × (하루 흡연량 ÷ 20) × 한 갑 가격</td>
-      </tr>
-      <tr>
-        <td>안 마신 술자리</td>
-        <td>일수 × (일주일에 마시던 횟수 ÷ 7)</td>
-      </tr>
-      <tr>
-        <td>아낀 돈 (금주)</td>
-        <td>일수 × (일주일에 마시던 횟수 ÷ 7) × 한 번에 쓰던 금액</td>
-      </tr>
-    </table>
+  <h3 class="list-title">금연 <a href="guide.html">전체 보기 →</a></h3>
+  <div class="card-list card-grid">
+    <a class="post-card" href="harms.html"><h2>담배가 몸에서 하는 일</h2><p>니코틴·타르·일산화탄소가 각각 무엇을 하는지, 주변 사람이 마시는 연기의 80%가 왜 내가 내뿜는 연기가 아닌지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="recovery.html"><h2>끊은 순간부터 몸에서 일어나는 일</h2><p>마지막 담배 20분 뒤부터 10년 뒤까지. 며칠째에 무엇이 달라지는지 시간순으로 정리한 회복 표.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="withdrawal.html"><h2>금단증상, 언제까지 이런가</h2><p>3일째가 정점이고 2주부터 내리막입니다. 증상 목록과 대처법, 다시 피우게 되는 네 가지 상황.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="weight.html"><h2>금연하면 살이 찌는 이유</h2><p>의지 문제가 아니라 몸에서 세 가지가 동시에 일어나기 때문입니다. 얼마나 찌는지, 그것이 계속 피울 이유가 되는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="ecig.html"><h2>전자담배로 바꾸면 금연이 되나</h2><p>궐련형과 액상형은 무엇이 다른지, 보건당국이 이것을 금연 방법으로 권하지 않는 네 가지 이유.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="nrt.html"><h2>니코틴 패치와 껌, 제대로 쓰는 법</h2><p>껌은 일반 껌처럼 씹으면 효과가 안 납니다. 씹었다 멈추는 방법과 흔한 실수 네 가지, 무료로 받는 법.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="clinic.html"><h2>보건소 금연클리닉, 실제로 어떻게 이용하나</h2><p>보건소·병의원·금연캠프가 각각 어떻게 다른지 표로 비교하고, 처음 방문하면 무엇을 하는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="pregnancy.html"><h2>임신과 담배</h2><p>연기가 태아에게 도달하는 경로와 보고된 영향. 베란다 흡연이 왜 해결책이 되지 못하는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="skin.html"><h2>담배와 피부</h2><p>흡연자의 얼굴이 나이보다 들어 보이는 이유. 혈류·콜라겐·표정 주름, 끊었을 때 무엇이 며칠 안에 달라지는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="sleep.html"><h2>금연하고 잠이 안 올 때</h2><p>불면과 선명해진 꿈은 흔한 금단증상입니다. 그리고 금연 후 커피가 갑자기 세지는 의외의 이유.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="smell.html"><h2>담배 냄새는 어디에 남나</h2><p>베란다에서 피워도 남는 3차 흡연 잔여물. 환기로 해결되지 않는 이유와 집·차를 정리하는 순서.</p><span class="post-more">읽기</span></a>
   </div>
 
-  <p>술은 담배와 달리 매일 마시는 것이 아니라서 주 단위로 입력받아 하루치로 환산합니다. 한 번에 쓰던 금액에 술값뿐 아니라 안주와 택시비까지 포함하면 실제 절약액에 가까워집니다.</p>
-
-  <h2>읽을거리</h2>
-
-  <p>끊는 동안 도움이 되는 것만 골라 정리했습니다. 모든 건강 관련 수치는 국가암정보센터, 질병관리청 국가건강정보포털 등 <strong>공공기관과 의료기관이 공개한 1차 자료</strong>를 확인하고 각 글 끝에 출처를 밝혀두었습니다.</p>
-
-  <h3>금연</h3>
-  <div class="card-list">
-    <a class="post-card" href="harms.html">
-      <h2>담배가 몸에서 하는 일</h2>
-      <p>니코틴·타르·일산화탄소가 각각 무엇을 하는지, 그리고 주변 사람이 마시는 연기의 80%가 왜 내가 내뿜는 연기가 아닌지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="recovery.html">
-      <h2>끊은 순간부터 몸에서 일어나는 일</h2>
-      <p>마지막 담배 20분 뒤부터 10년 뒤까지. 며칠째에 무엇이 달라지는지 시간순으로 정리한 회복 표.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="withdrawal.html">
-      <h2>금단증상, 언제까지 이런가</h2>
-      <p>3일째가 정점이고 2주부터 내리막입니다. 증상 목록과 공공기관이 권하는 대처법, 다시 피우게 되는 네 가지 상황.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="weight.html">
-      <h2>금연하면 살이 찌는 이유</h2>
-      <p>의지 문제가 아니라 몸에서 세 가지가 동시에 일어나기 때문입니다. 얼마나 찌는지, 그리고 그것이 계속 피울 이유가 되는지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="ecig.html">
-      <h2>전자담배로 바꾸면 금연이 되나</h2>
-      <p>궐련형과 액상형은 무엇이 다른지, 그리고 보건당국이 이것을 금연 방법으로 권하지 않는 네 가지 이유.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="nrt.html">
-      <h2>니코틴 패치와 껌, 제대로 쓰는 법</h2>
-      <p>껌은 일반 껌처럼 씹으면 효과가 안 납니다. 씹었다 멈추는 방법과 흔한 실수 네 가지, 무료로 받는 법.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="clinic.html">
-      <h2>보건소 금연클리닉, 실제로 어떻게 이용하나</h2>
-      <p>보건소·병의원·금연캠프가 각각 어떻게 다른지 표로 비교하고, 처음 방문하면 무엇을 하는지 정리했습니다.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="pregnancy.html">
-      <h2>임신과 담배</h2>
-      <p>연기가 태아에게 도달하는 경로와 보고된 영향. 그리고 베란다 흡연이 왜 해결책이 되지 못하는지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="skin.html">
-      <h2>담배와 피부</h2>
-      <p>흡연자의 얼굴이 나이보다 들어 보이는 이유. 혈류·콜라겐·표정 주름 네 가지 경로와, 끊었을 때 무엇이 며칠 안에 달라지는지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="sleep.html">
-      <h2>금연하고 잠이 안 올 때</h2>
-      <p>불면과 선명해진 꿈은 흔한 금단증상입니다. 그리고 금연 후 커피가 갑자기 세지는 의외의 이유까지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="smell.html">
-      <h2>담배 냄새는 어디에 남나</h2>
-      <p>베란다에서 피워도 남는 3차 흡연 잔여물. 환기로 해결되지 않는 이유와 집·차를 정리하는 순서.</p>
-      <span class="post-more">읽기</span>
-    </a>  </div>
-
-
-  <h3>금주</h3>
-  <div class="card-list">
-    <a class="post-card" href="alcohol-harms.html">
-      <h2>술이 몸에서 하는 일</h2>
-      <p>알코올은 담배와 같은 1군 발암물질입니다. 아세트알데히드가 DNA에 무엇을 하는지, 그리고 "적당히"가 실제로 몇 잔인지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="alcohol-benefits.html">
-      <h2>술을 끊으면 달라지는 것</h2>
-      <p>알코올 지방간은 금주만으로 완전히 정상으로 돌아옵니다. 간·잠·마음·혈압, 그리고 생각보다 큰 돈 이야기.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="alcohol-refusal.html">
-      <h2>술자리에서 안 마시는 법</h2>
-      <p>회식은 계속 잡힙니다. 가기 전에 정해둘 것, 짧고 단호하게 거절하는 법, 어쩔 수 없이 마셔야 할 때 몸을 덜 상하게 하는 법.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="hangover.html">
-      <h2>숙취의 정체</h2>
-      <p>숙취는 하나의 증상이 아닙니다. 아세트알데히드, 탈수, 수면 붕괴, 저혈당이 각각 무엇을 만드는지와 숙취해소제의 실제 역할.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="alcohol-medicine.html">
-      <h2>술과 약을 같이 먹으면</h2>
-      <p>간에서 자리를 다투고, 작용이 같은 방향으로 겹칩니다. 특히 조심해야 할 약 여덟 가지를 표로 정리했습니다.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="solo-drinking.html">
-      <h2>혼술이 위험해지는 지점</h2>
-      <p>혼술 자체가 문제는 아닙니다. 다만 멈춰주는 장치가 하나도 없습니다. 습관으로 굳는 다섯 단계와 확인해볼 신호.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="alcohol-weight.html">
-      <h2>술을 끊으면 살이 빠지나</h2>
-      <p>소주 한 병이 몇 kcal인지 직접 계산해보고, 알코올을 처리하는 동안 안주가 어디로 가는지 정리했습니다.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="flush.html">
-      <h2>술 마시면 얼굴이 빨개지는 사람</h2>
-      <p>체질이 아니라 분해 효소가 부족하다는 신호입니다. "마시다 보면 는다"가 위험한 이유.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="exercise.html">
-      <h2>운동하는데 술을 마신다면</h2>
-      <p>주중에 운동하고 주말에 마시면 남는 게 있을까. 근육 회복과 수면에서 정확히 무엇이 부딪히는지.</p>
-      <span class="post-more">읽기</span>
-    </a>
-    <a class="post-card" href="nonalcohol.html">
-      <h2>무알코올 맥주, 금주에 도움이 될까</h2>
-      <p>무알코올과 비알코올은 다릅니다. 라벨 읽는 법과, 도움이 되는 사람과 오히려 조심해야 할 사람.</p>
-      <span class="post-more">읽기</span>
-    </a>  </div>
-
-
-  <h3>미니 도구</h3>
-  <div class="card-list">
-    <a class="post-card" href="tools.html">
-      <h2>🫁 숨참기 · 🏥 추정 신체 나이</h2>
-      <p>숨을 얼마나 참는지 재보는 챌린지와, 생활습관 6문항으로 보는 폐·간의 추정 나이. 두 가지가 한 페이지에 있고 결과에 실제 회복 일정표가 함께 나옵니다.</p>
-      <span class="post-more">해보기</span>
-    </a>
-    <a class="post-card" href="test-smoke.html">
-      <h2>🚬 흡연 &amp; 금연 성향 테스트</h2>
-      <p>담배를 대하는 습관 10가지로 알아보는 나의 유형. 철혈의 금연 지휘관부터 고민하는 철학자 스모커까지, 유형별로 잘 맞는 금연 전략이 함께 나옵니다.</p>
-      <span class="post-more">테스트 하기</span>
-    </a>
-    <a class="post-card" href="test.html">
-      <h2>🍻 술자리 성격 테스트</h2>
-      <p>술자리 상황 10개로 알아보는 나의 유형. 광란의 3차 지배자부터 알코올 힐링 상담사까지 8가지 캐릭터 중 나는 어디에 속할까요.</p>
-      <span class="post-more">테스트 하기</span>
-    </a>
+  <h3 class="list-title">금주 <a href="guide-drink.html">전체 보기 →</a></h3>
+  <div class="card-list card-grid">
+    <a class="post-card" href="alcohol-harms.html"><h2>술이 몸에서 하는 일</h2><p>알코올은 담배와 같은 1군 발암물질입니다. 아세트알데히드가 DNA에 무엇을 하는지, "적당히"가 실제로 몇 잔인지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="alcohol-benefits.html"><h2>술을 끊으면 달라지는 것</h2><p>알코올 지방간은 금주만으로 정상으로 돌아옵니다. 간·잠·마음·혈압, 그리고 생각보다 큰 돈 이야기.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="alcohol-refusal.html"><h2>술자리에서 안 마시는 법</h2><p>회식은 계속 잡힙니다. 가기 전에 정해둘 것, 짧고 단호하게 거절하는 법, 어쩔 수 없이 마셔야 할 때.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="hangover.html"><h2>숙취의 정체</h2><p>숙취는 하나의 증상이 아닙니다. 아세트알데히드, 탈수, 수면 붕괴, 저혈당이 각각 무엇을 만드는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="alcohol-medicine.html"><h2>술과 약을 같이 먹으면</h2><p>간에서 자리를 다투고, 작용이 같은 방향으로 겹칩니다. 특히 조심해야 할 약 여덟 가지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="solo-drinking.html"><h2>혼술이 위험해지는 지점</h2><p>혼술 자체가 문제는 아닙니다. 다만 멈춰주는 장치가 없습니다. 습관으로 굳는 다섯 단계와 확인해볼 신호.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="alcohol-weight.html"><h2>술을 끊으면 살이 빠지나</h2><p>소주 한 병이 몇 kcal인지 직접 계산해보고, 알코올을 처리하는 동안 안주가 어디로 가는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="flush.html"><h2>술 마시면 얼굴이 빨개지는 사람</h2><p>체질이 아니라 분해 효소가 부족하다는 신호입니다. "마시다 보면 는다"가 위험한 이유.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="exercise.html"><h2>운동하는데 술을 마신다면</h2><p>주중에 운동하고 주말에 마시면 남는 게 있을까. 근육 회복과 수면에서 정확히 무엇이 부딪히는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="nonalcohol.html"><h2>무알코올 맥주, 금주에 도움이 될까</h2><p>무알코올과 비알코올은 다릅니다. 라벨 읽는 법과, 도움이 되는 사람과 조심해야 할 사람.</p><span class="post-more">읽기</span></a>
   </div>
 
-  <h2>자주 묻는 것</h2>
+  <h2 class="section-title">테스트와 도구</h2>
+  <div class="card-list card-grid">
+    <a class="post-card" href="test-smoke.html"><h2>🚬 흡연 &amp; 금연 성향 테스트</h2><p>담배를 대하는 습관 10가지로 알아보는 나의 유형. 유형별로 잘 맞는 금연 전략이 함께 나옵니다.</p><span class="post-more">테스트 하기</span></a>
+    <a class="post-card" href="test.html"><h2>🍻 술자리 성격 테스트</h2><p>술자리 상황 10개로 알아보는 나의 유형. 광란의 3차 지배자부터 알코올 힐링 상담사까지 8가지.</p><span class="post-more">테스트 하기</span></a>
+    <a class="post-card" href="tools.html"><h2>🫁 숨참기 · 🏥 추정 신체 나이</h2><p>숨을 얼마나 참는지 재보는 챌린지와, 생활습관 6문항으로 보는 폐·간의 추정 나이. 결과에 회복 일정표가 함께 나옵니다.</p><span class="post-more">해보기</span></a>
+  </div>
 
-  <h3>며칠째는 어떻게 세나요?</h3>
-  <p>시작한 날을 <strong>1일째</strong>로 봅니다. 8월 1일에 시작했다면 8월 1일이 1일째, 8월 2일이 2일째입니다. 자정이 지나면 자동으로 하루가 올라갑니다.</p>
+  <h2 class="section-title">자주 묻는 것</h2>
 
-  <h3>며칠 동안 안 열면 숫자가 밀리나요?</h3>
-  <p>밀리지 않습니다. 일수를 어딘가에 쌓아두는 방식이 아니라 <strong>열 때마다 시작일과 오늘 날짜를 비교해 다시 계산</strong>합니다. 한 달을 안 열었다가 열어도 정확한 숫자가 나옵니다.</p>
-
-  <h3>가입해야 하나요? 돈이 드나요?</h3>
-  <p>둘 다 아닙니다. 회원가입이 없고 전부 무료입니다. 입력한 값은 <strong>이 브라우저 안에만 저장</strong>되며 서버로 전송되지 않습니다. 자세한 내용은 <a href="privacy.html">개인정보처리방침</a>에 적어두었습니다.</p>
-
-  <h3>기록이 사라졌어요</h3>
-  <p>브라우저의 인터넷 사용 기록이나 사이트 데이터를 지우면 함께 지워집니다. 다만 <strong>시작일만 다시 넣으면 일수는 그대로 복구</strong>됩니다. 계산해서 보여주는 방식이라 잃어버릴 기록 자체가 없는 셈입니다.</p>
-
-  <h3>휴대폰과 컴퓨터의 숫자가 다릅니다</h3>
-  <p>기록이 기기의 브라우저에 저장되기 때문에 기기마다 따로 관리됩니다. 같은 숫자를 보려면 각각에서 같은 시작일을 넣어주세요.</p>
-
-  <h3>다시 피웠거나 마셨습니다</h3>
-  <p>화면 아래의 <strong>실패 버튼</strong>을 누르면 다시 시작할 날짜를 고를 수 있습니다. 몇 번째 시도인지는 묻지 않습니다. 실패를 숨기게 만들면 앱을 아예 열지 않게 되기 때문에 일부러 넣어둔 기능입니다.</p>
-
-  <h3>컴퓨터를 켤 때 자동으로 뜨게 할 수 있나요?</h3>
-  <p>됩니다. 크롬이나 엣지의 앱 설치 기능을 쓰면 주소창 없는 창으로 열리고, 설정에서 로그인 시 자동 실행을 켤 수 있습니다. 설치 파일을 내려받을 필요는 없습니다. 방법은 <a href="install.html">데스크탑에 설치</a>에 단계별로 적어두었습니다.</p>
+  <div class="faq">
+    <details>
+      <summary>며칠째는 어떻게 세나요?</summary>
+      <p>시작한 날을 <strong>1일째</strong>로 봅니다. 8월 1일에 시작했다면 8월 1일이 1일째, 8월 2일이 2일째입니다. 자정이 지나면 자동으로 하루가 올라갑니다.</p>
+    </details>
+    <details>
+      <summary>며칠 동안 안 열면 숫자가 밀리나요?</summary>
+      <p>밀리지 않습니다. 일수를 어딘가에 쌓아두는 방식이 아니라 <strong>열 때마다 시작일과 오늘 날짜를 비교해 다시 계산</strong>합니다. 한 달을 안 열었다가 열어도 정확한 숫자가 나옵니다.</p>
+    </details>
+    <details>
+      <summary>가입해야 하나요? 돈이 드나요?</summary>
+      <p>둘 다 아닙니다. 회원가입이 없고 전부 무료입니다. 입력한 값은 <strong>이 브라우저 안에만 저장</strong>되며 서버로 전송되지 않습니다. 자세한 내용은 <a href="privacy.html">개인정보처리방침</a>에 적어두었습니다.</p>
+    </details>
+    <details>
+      <summary>여러 습관을 동시에 셀 수 있나요?</summary>
+      <p>됩니다. 카운터 왼쪽 위의 습관 이름을 누르면 다른 습관으로 바뀌고, 각각 따로 저장됩니다. 담배 100일째와 커피 12일째를 같이 셀 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>기록이 사라졌어요</summary>
+      <p>브라우저의 인터넷 사용 기록이나 사이트 데이터를 지우면 함께 지워집니다. 다만 <strong>시작일만 다시 넣으면 일수는 그대로 복구</strong>됩니다. 계산해서 보여주는 방식이라 잃어버릴 기록 자체가 없는 셈입니다.</p>
+    </details>
+    <details>
+      <summary>휴대폰과 컴퓨터의 숫자가 다릅니다</summary>
+      <p>기록이 기기의 브라우저에 저장되기 때문에 기기마다 따로 관리됩니다. 같은 숫자를 보려면 각각에서 같은 시작일을 넣어주세요.</p>
+    </details>
+    <details>
+      <summary>컴퓨터를 켤 때 자동으로 뜨게 할 수 있나요?</summary>
+      <p>됩니다. 크롬이나 엣지의 앱 설치 기능을 쓰면 주소창 없는 창으로 열리고, 로그인 시 자동 실행을 켤 수 있습니다. 설치 파일을 내려받을 필요는 없습니다. 방법은 <a href="install.html">데스크탑에 설치</a>에 단계별로 적어두었습니다.</p>
+    </details>
+  </div>
 
   <div class="notice">
     <p>이 사이트가 제공하는 건강 정보는 공개된 공공기관 자료를 정리한 <strong>참고용 정보</strong>이며 의학적 진단이나 치료를 대신하지 않습니다. 금단 증상이 심하거나 건강에 이상이 느껴진다면 의사, 약사와 상담하세요. 금연은 <strong>금연상담전화 1544-9030</strong>, 음주 문제는 <strong>보건복지상담센터 129</strong>에서 무료로 상담받을 수 있습니다.</p>
     <p>특히 <strong>알코올 금단 증상은 그 자체로 위험할 수 있습니다.</strong> 매일 많은 양을 오랫동안 마셔온 경우에는 혼자 판단해서 갑자기 끊지 말고 반드시 의료진과 상의하세요.</p>
   </div>
-
-  <footer class="page-foot">
-    <a href="guide.html">금연 정보</a> · <a href="guide-drink.html">금주 정보</a> · <a href="test.html">심리테스트</a> · <a href="about.html">소개</a> · <a href="privacy.html">개인정보처리방침</a> · <a href="contact.html">문의</a> · <a href="install.html">데스크탑 설치</a>
-  </footer>
 </section>
 
-<!-- 첫 실행: 초기 설정 -->
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <div class="site-foot-brand"><span class="site-mark">◐</span>오늘만 하고 끊을게</div>
+    <nav>
+      <a href="guide.html">금연 정보</a>
+      <a href="guide-drink.html">금주 정보</a>
+      <a href="test.html">테스트</a>
+      <a href="tools.html">도구</a>
+      <a href="install.html">데스크탑 설치</a>
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="contact.html">문의</a>
+    </nav>
+    <p class="site-foot-note">개인이 운영하는 사이트입니다. 입력한 값은 브라우저 안에만 저장되며, 광고 외의 수익 모델이 없습니다.</p>
+  </div>
+</footer>
+
+<!-- ===== 첫 설정 ===== -->
 <div id="onboarding" class="overlay hidden">
   <div class="card">
-    <h1>오늘만 하고 끊을게</h1>
+    <h1 id="obTitle">🚬 금연</h1>
     <p id="obLead" class="sub">딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
 
     <label class="field">
@@ -378,7 +310,7 @@
       <input id="obStart" type="date">
     </label>
 
-    <div class="only-smoke">
+    <div class="only-profile">
       <div class="field">
         <span>성별 <em>선택</em></span>
         <div id="obGender" class="seg" data-value="">
@@ -387,42 +319,19 @@
         </div>
         <p class="field-note">평균 흡연량과 비교하는 데만 써요. 고르면 아래 흡연량이 평균값으로 채워져요.</p>
       </div>
-      <div class="field-row">
-        <label class="field">
-          <span>나이 <em>선택</em></span>
-          <input id="obAge" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
-        </label>
-        <label class="field">
-          <span>한 갑 가격 (원)</span>
-          <input id="obPrice" type="number" min="0" step="100" inputmode="numeric">
-        </label>
-      </div>
       <label class="field">
-        <span>하루 흡연량 (개비)</span>
-        <input id="obCigs" type="number" min="1" step="0.1" inputmode="decimal">
+        <span>나이 <em>선택</em></span>
+        <input id="obAge" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
       </label>
-      <p class="field-note">실제로 피우던 양을 알면 그걸 넣는 쪽이 정확해요.</p>
     </div>
 
-    <div class="only-drink">
-      <div class="field-row">
-        <label class="field">
-          <span>일주일에 몇 번</span>
-          <input id="obFreq" type="number" min="0.5" max="21" step="0.5" inputmode="decimal">
-        </label>
-        <label class="field">
-          <span>한 번에 쓰던 돈 (원)</span>
-          <input id="obCost" type="number" min="0" step="1000" inputmode="numeric">
-        </label>
-      </div>
-      <p class="field-note">끊기 전에 보통 어땠는지를 넣어주세요. 술값에 안주와 택시비까지 넣으면 실제 절약액에 가까워져요.</p>
-    </div>
+    <div id="obFields"></div>
 
     <button id="obSave" class="primary" type="button">시작하기</button>
   </div>
 </div>
 
-<!-- 축하 -->
+<!-- ===== 축하 ===== -->
 <div id="celebration" class="overlay hidden">
   <div class="card">
     <div id="celeBadge" class="cele-badge">10일</div>
@@ -433,7 +342,7 @@
   </div>
 </div>
 
-<!-- 설정 -->
+<!-- ===== 설정 ===== -->
 <div id="settings" class="overlay hidden">
   <div class="card">
     <h2 id="settingsTitle">금연 설정</h2>
@@ -443,7 +352,7 @@
       <input id="startInput" type="date">
     </label>
 
-    <div class="only-smoke">
+    <div class="only-profile">
       <div class="field">
         <span>성별 <em>선택</em></span>
         <div id="genderInput" class="seg" data-value="">
@@ -452,36 +361,14 @@
         </div>
         <p class="field-note">평균 흡연량과 비교하는 데만 써요. 선택된 버튼을 다시 누르면 해제돼요.</p>
       </div>
-      <div class="field-row">
-        <label class="field">
-          <span>나이 <em>선택</em></span>
-          <input id="ageInput" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
-        </label>
-        <label class="field">
-          <span>한 갑 가격 (원)</span>
-          <input id="priceInput" type="number" min="0" step="100" inputmode="numeric">
-        </label>
-      </div>
       <label class="field">
-        <span>하루 흡연량 (개비)</span>
-        <input id="cigsInput" type="number" min="1" step="0.1" inputmode="decimal">
+        <span>나이 <em>선택</em></span>
+        <input id="ageInput" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
       </label>
     </div>
 
-    <div class="only-drink">
-      <div class="field-row">
-        <label class="field">
-          <span>일주일에 몇 번</span>
-          <input id="freqInput" type="number" min="0.5" max="21" step="0.5" inputmode="decimal">
-        </label>
-        <label class="field">
-          <span>한 번에 쓰던 돈 (원)</span>
-          <input id="costInput" type="number" min="0" step="1000" inputmode="numeric">
-        </label>
-      </div>
-    </div>
+    <div id="setFields"></div>
 
-    <p class="sub">설정은 이 브라우저에만 저장되고 어디로도 전송되지 않아요.</p>
     <div class="btn-row">
       <button id="settingsCancel" type="button">취소</button>
       <button id="settingsSave" class="primary" type="button">저장</button>
@@ -489,49 +376,34 @@
   </div>
 </div>
 
-<!-- 실패: 1단계 확인 -->
+<!-- ===== 실패 확인 ===== -->
 <div id="failConfirm" class="overlay hidden">
   <div class="card">
-    <h2>정말 초기화할까요?</h2>
+    <h2>정말 실패인가요?</h2>
     <p id="failConfirmMsg"></p>
-    <p class="sub">되돌릴 수 없어요. 하지만 다시 시작하면 그만이에요.</p>
     <div class="btn-row">
-      <button id="failCancel" type="button">아니요</button>
-      <button id="failOk" class="danger-solid" type="button">네, 초기화</button>
+      <button id="failCancel" type="button">아니요, 계속할게요</button>
+      <button id="failOk" class="danger-solid" type="button">네, 실패했어요</button>
     </div>
   </div>
 </div>
 
-<!-- 실패: 2단계 재시작 -->
+<!-- ===== 실패 뒤 재시작 ===== -->
 <div id="failRestart" class="overlay sad hidden">
   <div class="card sad-card">
-    <div class="sad-mark">0</div>
-    <h1>다시 0일부터</h1>
-    <p id="failRestartMsg">괜찮아요. 끊으려고 했던 마음은 사라지지 않아요.</p>
+    <div class="sad-mark">…</div>
+    <h1>괜찮아요</h1>
+    <p>한 번 넘어진 것뿐이에요. 다시 시작하는 사람이 결국 끊습니다.</p>
     <label class="field restart-field">
       <span>언제 다시 시작할까요?</span>
       <input id="restartInput" type="date">
     </label>
-    <button id="restartSave" class="primary" type="button">다시 시작하기</button>
+    <button id="restartSave" class="primary" type="button">이 날부터 다시</button>
   </div>
 </div>
 
-<script src="config.js?v=20260820a"></script>
-<script src="app.js?v=20260820a"></script>
+<script src="config.js?v=20260905a"></script>
+<script src="habits.js?v=20260905a"></script>
+<script src="app.js?v=20260905a"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

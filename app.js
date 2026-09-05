@@ -1,54 +1,12 @@
 'use strict';
 
-// ===== 모드 (금연 / 금주) =====
-// 두 탭은 계산 방식과 화면 문구만 다르고 나머지 구조는 같다.
-
-const MODES = {
-  smoke: {
-    id: 'smoke',
-    verb: '금연',
-    startLabel: '금연 시작일',
-    countLabel: '안 피운 담배',
-    failLabel: '금연 실패',
-    guideHref: 'guide.html',
-    guideLabel: '금연 정보',
-    testHref: 'test-smoke.html',
-    testEmoji: '🚬',
-    testTitle: '흡연 & 금연 성향 테스트',
-    testSub: '나에게 맞는 금연 전략은?',
-    toolsSub: '숨참기 챌린지 · 추정 신체 나이',
-    // 하루에 아끼는 돈
-    moneyPerDay: () => (getNum('cigsPerDay', CONFIG.cigsPerDay) / 20) * getNum('pricePerPack', CONFIG.pricePerPack),
-    // 하루에 줄어드는 개수와 그 단위
-    countPerDay: () => getNum('cigsPerDay', CONFIG.cigsPerDay),
-    countUnit: '개비',
-    countText: (total) => comma(total) + '개비',
-    celebrateText: (total) => `담배 ${comma(total)}개비를 피우지 않았어요.`,
-  },
-  drink: {
-    id: 'drink',
-    verb: '금주',
-    startLabel: '금주 시작일',
-    countLabel: '안 마신 술자리',
-    failLabel: '금주 실패',
-    guideHref: 'guide-drink.html',
-    guideLabel: '금주 정보',
-    testHref: 'test.html',
-    testEmoji: '🍻',
-    testTitle: '술자리 성격 테스트',
-    testSub: '나는 어떤 타입이었을까?',
-    toolsSub: '숨참기 챌린지 · 추정 신체 나이',
-    moneyPerDay: () => (getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7) * getNum('costPerDrink', CONFIG.costPerDrink),
-    countPerDay: () => getNum('drinksPerWeek', CONFIG.drinksPerWeek) / 7,
-    countUnit: '번',
-    countText: (total) => comma(Math.round(total)) + '번',
-    celebrateText: (total) => `술자리 ${comma(Math.round(total))}번을 넘겼어요.`,
-  },
-};
+// ===== 카운터 엔진 =====
+// 어떤 습관을 세는지는 habits.js 의 HABITS 에서 읽는다. 여기서는 그 데이터를
+// 바탕으로 저장하고, 계산하고, 화면을 그린다.
 
 let mode = 'smoke';
 
-function M() { return MODES[mode]; }
+function H() { return HABITS[mode]; }
 
 // ===== 저장소 (localStorage를 못 쓰는 환경에서도 죽지 않게) =====
 
@@ -62,8 +20,8 @@ function writeStore(key, value) {
   try { window.localStorage.setItem(key, value); return true; } catch (e) { return false; }
 }
 
-// 모드별로 키를 나눠 쓴다. 예: qs.smoke.startDate / qs.drink.startDate
-function k(name) { return `qs.${mode}.${name}`; }
+// 습관별로 키를 나눠 쓴다. 예: qs.smoke.startDate / qs.coffee.startDate
+function k(name, id) { return `qs.${id || mode}.${name}`; }
 
 function get(name) { return readStore(k(name)); }
 function set(name, value) { return writeStore(k(name), value); }
@@ -73,7 +31,8 @@ function getNum(name, fallback) {
   return v > 0 ? v : fallback;
 }
 
-// 모드 구분이 없던 시절(qs.startDate 등)의 값을 금연 쪽으로 옮긴다
+// 습관 구분이 없던 시절(qs.startDate 등)의 값을 금연 쪽으로 옮긴다.
+// 지우면 초기 사용자의 기록이 사라진다.
 function migrateOldKeys() {
   if (readStore('qs.smoke.startDate') || !readStore('qs.startDate')) return;
   const pairs = [
@@ -109,15 +68,16 @@ function toInputValue(d) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-function getStartDate() { return parseDate(get('startDate')); }
+function getStartDate(id) { return parseDate(readStore(k('startDate', id))); }
 function setStartDate(d) { set('startDate', toInputValue(d)); }
 
 // 시작일이 1일차. 시작일이 아직 안 왔으면 0 이하가 나온다.
-function currentDay() {
-  const start = getStartDate();
+function dayFor(start) {
   if (!start) return 0;
   return Math.floor((dayStamp(new Date()) - dayStamp(start)) / 86400000) + 1;
 }
+
+function currentDay() { return dayFor(getStartDate()); }
 
 function formatDate(d) {
   const week = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
@@ -133,27 +93,80 @@ function trim1(n) {
   return (Math.round(n * 10) / 10).toString();
 }
 
+// 분 → "3일 4시간" / "12시간 30분" / "45분"
+function fmtMinutes(min) {
+  const m = Math.max(Math.round(min), 0);
+  const d = Math.floor(m / 1440);
+  const h = Math.floor((m % 1440) / 60);
+  const mm = m % 60;
+  if (d >= 1) return `${comma(d)}일 ${h}시간`;
+  if (h >= 1) return `${h}시간 ${mm}분`;
+  return `${mm}분`;
+}
+
+// 400x600 앱 창의 작은 칸에 넣는 짧은 표기
+function shortWon(value) {
+  const v = Math.round(value);
+  if (v >= 100000000) {
+    const eok = v / 100000000;
+    return (eok >= 10 ? Math.round(eok) : Math.round(eok * 10) / 10) + '억';
+  }
+  if (v >= 10000) return comma(Math.round(v / 10000)) + '만';
+  return comma(v) + '원';
+}
+
+function shortMinutes(min) {
+  const h = min / 60;
+  if (h >= 48) return comma(Math.round(h / 24)) + '일';
+  return comma(Math.round(h)) + '시간';
+}
+
+// ===== 지표 =====
+// 습관마다 하루에 쌓이는 값. money 습관은 원, time 습관은 분.
+
+function perDay() {
+  return H().perDay(getNum, get);
+}
+
+function isTime() { return H().metric === 'time'; }
+
+// 하루 단위의 본체 값 (원 또는 분)
+function unitPerDay() {
+  const p = perDay();
+  return isTime() ? (p.minutes || 0) : (p.money || 0);
+}
+
+function fmtMain(total) {
+  return isTime() ? fmtMinutes(total) : comma(total) + '원';
+}
+
+function fmtMainShort(total) {
+  return isTime() ? shortMinutes(total) : shortWon(total);
+}
+
+function mainLabel() {
+  const h = H();
+  if (isTime()) return h.timeLabel || '되찾은 시간';
+  return h.moneyLabel || '아낀 돈';
+}
+
 // ===== 금연 전용: 성별·나이 =====
 
-// 'male' | 'female' | '' (안 고름)
 function getGender() {
   const v = get('gender');
   return (v === 'male' || v === 'female') ? v : '';
 }
 
-// 나이는 선택 항목이라 없으면 null
 function getAge() {
   const v = Number(get('age'));
   return (v > 0 && v < 130) ? Math.floor(v) : null;
 }
 
-// 성별에 해당하는 하루 평균 흡연량 (개비). 안 골랐으면 null
 function averageCigsFor(gender) {
   const table = CONFIG.averageCigs || {};
   return table[gender] > 0 ? table[gender] : null;
 }
 
-// 금연으로 되찾는 기대수명. 근거 수치가 있는 연령대만 숫자를 돌려준다.
 function lifeGainedFor(age) {
   if (age === null) return null;
   const hit = (CONFIG.lifeGained || []).find((r) => age >= r.min && age <= r.max);
@@ -161,7 +174,6 @@ function lifeGainedFor(age) {
 }
 
 // ===== 마일스톤 =====
-// 10일마다 축하하고, 100일 단위는 더 특별하게 축하한다.
 
 function everyN() { return CONFIG.milestoneEvery > 0 ? CONFIG.milestoneEvery : 10; }
 function specialN() { return CONFIG.specialEvery > 0 ? CONFIG.specialEvery : 100; }
@@ -189,9 +201,9 @@ function milestoneMessage(day) {
 
 const $ = (id) => document.getElementById(id);
 
-// 배포 직후 브라우저가 새 HTML 과 캐시에 남은 옛 app.js 를 섞어 쓰는 순간이 있다.
-// 그때 없는 요소를 만지다 오류가 나면 그 뒤의 render() 까지 멈춰서 일수와
-// 아낀 돈이 0으로 보인다(저장된 값은 멀쩡한데도). 화면 장식용 요소는 이걸 거쳐 쓴다.
+// 배포 직후 새 HTML 과 캐시에 남은 옛 스크립트가 섞이는 순간이 있다. 없는
+// 요소를 만지다 멈추면 그 뒤의 render() 까지 죽어 일수가 0으로 보이므로
+// 장식용 요소는 이걸 거쳐 쓴다.
 function setIfPresent(id, apply) {
   const el = $(id);
   if (el) apply(el);
@@ -199,26 +211,51 @@ function setIfPresent(id, apply) {
 
 let renderedDay = null;
 
-// 모드에 따라 달라지는 문구를 한 번에 갈아끼운다
 function applyModeLabels() {
-  const m = M();
-  $('countLabel').textContent = m.countLabel;
-  $('failBtn').textContent = m.failLabel;
-  $('obStartLabel').textContent = m.startLabel;
-  $('startInputLabel').textContent = m.startLabel;
-  $('settingsTitle').textContent = m.verb + ' 설정';
-  // 아래 메뉴의 정보 링크도 탭에 맞춰 바뀐다
-  $('guideLink').href = m.guideHref;
-  $('guideLink').textContent = m.guideLabel;
-  // 심리테스트는 탭에 맞는 것 하나만 건다. 미니 도구는 두 탭 모두에 둔다.
-  // HTML 과 이 파일의 배포 시점이 어긋나도 카운터가 멈추지 않도록 요소를 확인하고 쓴다.
-  setIfPresent('testPromo', (el) => { el.href = m.testHref; });
-  setIfPresent('testPromoEmoji', (el) => { el.textContent = m.testEmoji; });
-  setIfPresent('testPromoTitle', (el) => { el.textContent = m.testTitle; });
-  setIfPresent('testPromoSub', (el) => { el.textContent = m.testSub; });
-  setIfPresent('toolsPromoSub', (el) => { el.textContent = m.toolsSub; });
+  const h = H();
+
+  setIfPresent('habitEmoji', (el) => { el.textContent = h.emoji; });
+  setIfPresent('habitName', (el) => { el.textContent = h.name; });
+  $('countLabel').textContent = h.countLabel;
+  $('mainLabel').textContent = mainLabel();
+  $('failBtn').textContent = h.failLabel;
+  $('obStartLabel').textContent = h.startLabel;
+  $('startInputLabel').textContent = h.startLabel;
+  $('settingsTitle').textContent = h.verb + ' 설정';
+  $('obTitle').textContent = h.emoji + ' ' + h.verb;
+  $('obLead').textContent = h.obLead || '딱 한 번만 설정하면, 이후로는 알아서 세어드려요.';
+
+  // 성별·나이는 담배에서만 (평균 흡연량 비교용)
+  for (const el of document.querySelectorAll('.only-profile')) {
+    el.classList.toggle('hidden', !h.profile);
+  }
+
+  // 정보 페이지가 있는 습관만 링크를 건다
+  setIfPresent('guideLink', (el) => {
+    if (h.guideHref) { el.href = h.guideHref; el.textContent = h.guideLabel; el.classList.remove('hidden'); }
+    else el.classList.add('hidden');
+  });
+
+  // 심리테스트가 있는 습관만 배너를 보여준다
+  setIfPresent('testPromo', (el) => {
+    if (h.testHref) {
+      el.href = h.testHref;
+      setIfPresent('testPromoEmoji', (e) => { e.textContent = h.testEmoji; });
+      setIfPresent('testPromoTitle', (e) => { e.textContent = h.testTitle; });
+      setIfPresent('testPromoSub', (e) => { e.textContent = h.testSub; });
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
   document.body.dataset.mode = mode;
-  setSeg('modeTabs', mode);
+  document.body.dataset.metric = h.metric;
+
+  // 선택 메뉴에서 지금 습관을 표시
+  for (const b of document.querySelectorAll('#habitMenu button[data-habit]')) {
+    b.classList.toggle('active', b.dataset.habit === mode);
+  }
 }
 
 function render() {
@@ -248,8 +285,9 @@ function render() {
   ring.style.strokeDasharray = String(circumference);
   ring.style.strokeDashoffset = String(circumference * (1 - ratio));
 
-  $('saved').textContent = comma(shown * M().moneyPerDay()) + '원';
-  $('notSmoked').textContent = M().countText(shown * M().countPerDay());
+  const p = perDay();
+  $('saved').textContent = fmtMain(shown * unitPerDay());
+  $('notSmoked').textContent = H().countText(shown * (p.count || 0));
 
   const start = getStartDate();
   $('startInfo').textContent = start
@@ -258,11 +296,13 @@ function render() {
 
   renderSnowball();
   renderInsight();
+  renderHero();
+  renderHub();
 }
 
 // ===== 이대로 가면 얼마가 모이는지 =====
 // 시작일로부터 1개월/6개월/1년/5년이 되는 날짜를 달력 기준으로 잡고,
-// 그날까지 쌓이는 절약액과 아직 남은 시간을 같이 보여준다.
+// 그날까지 쌓이는 값과 아직 남은 시간을 같이 보여준다.
 
 const HORIZONS = [
   { label: '1개월', months: 1 },
@@ -279,31 +319,18 @@ function addMonths(date, months) {
   return d;
 }
 
-// 시작일을 1일째로 볼 때 그 날짜가 며칠째인지
 function dayNumberOf(start, date) {
   return Math.floor((dayStamp(date) - dayStamp(start)) / 86400000) + 1;
 }
 
-// 400x600 앱 창에 넣어야 해서 만 단위로 줄여 쓴다
-function shortWon(value) {
-  const v = Math.round(value);
-  if (v >= 100000000) {
-    const eok = v / 100000000;
-    return (eok >= 10 ? Math.round(eok) : Math.round(eok * 10) / 10) + '억';
-  }
-  if (v >= 10000) return comma(Math.round(v / 10000)) + '만';
-  return comma(v) + '원';
-}
-
 function renderSnowball() {
   const box = $('snowball');
-  if (!box) return;                     // 옛 HTML 과 섞여 돌아도 죽지 않게
+  if (!box) return;
 
   const start = getStartDate();
-  const perDay = M().moneyPerDay();
+  const unit = unitPerDay();
 
-  // 시작일이 없거나 아낄 돈이 0이면 보여줄 것이 없다
-  if (!start || !(perDay > 0)) {
+  if (!start || !(unit > 0)) {
     box.classList.add('hidden');
     return;
   }
@@ -316,14 +343,14 @@ function renderSnowball() {
 
   for (const h of HORIZONS) {
     const target = addMonths(start, h.months);
-    const amount = perDay * dayNumberOf(start, target);
+    const amount = unit * dayNumberOf(start, target);
     const leftMs = target.getTime() - now.getTime();
     const done = leftMs <= 0;
     if (!done && !next) next = { label: h.label, amount, target };
 
     const cell = document.createElement('div');
     cell.className = 'snow-cell' + (done ? ' done' : '');
-    cell.title = `${h.label} 뒤 ${comma(Math.round(amount))}원`;
+    cell.title = `${h.label} 뒤 ${fmtMain(amount)}`;
 
     const label = document.createElement('span');
     label.className = 'snow-label';
@@ -331,7 +358,7 @@ function renderSnowball() {
 
     const money = document.createElement('span');
     money.className = 'snow-amount';
-    money.textContent = shortWon(amount);
+    money.textContent = fmtMainShort(amount);
 
     const left = document.createElement('span');
     left.className = 'snow-left';
@@ -344,7 +371,6 @@ function renderSnowball() {
   renderSnowNext(next);
 }
 
-// 아직 안 지난 가장 가까운 구간까지 남은 시간을 분 단위로
 function renderSnowNext(next) {
   const el = $('snowNext');
   if (!el) return;
@@ -366,52 +392,46 @@ function renderSnowNext(next) {
   if (days || hours) parts.push(`${hours}시간`);
   parts.push(`${minutes}분`);
 
-  el.innerHTML = `<strong>${next.label}</strong>까지 ${parts.join(' ')} 남았어요 · 그때 <strong>${comma(Math.round(next.amount))}원</strong>`;
+  el.innerHTML = `<strong>${next.label}</strong>까지 ${parts.join(' ')} 남았어요 · 그때 <strong>${fmtMain(next.amount)}</strong>`;
 }
 
-// 금연 탭에서 성별·나이를 넣은 사람에게만 보여주는 추가 정보
+// 담배에서 성별·나이를 넣은 사람에게만 보여주는 추가 정보
 function renderInsight() {
+  const box = $('insight');
+  if (!box) return;
   const avgEl = $('insightAvg');
   const lifeEl = $('insightLife');
   const srcEl = $('insightSource');
 
   if (mode !== 'smoke') {
-    $('insight').classList.add('hidden');
+    box.classList.add('hidden');
     return;
   }
 
   const sources = [];
 
-  // 같은 성별 평균과 비교
   const avg = averageCigsFor(getGender());
   if (avg !== null) {
-    const mine = getNum('cigsPerDay', CONFIG.cigsPerDay);
+    const mine = getNum('cigsPerDay', 20);
     const diff = mine - avg;
     const avgText = `같은 성별 평균 <strong>하루 ${trim1(avg)}개비</strong>`;
-    if (diff > 0.05) {
-      avgEl.innerHTML = `${avgText}보다 ${trim1(diff)}개비 더 피우고 있었어요.`;
-    } else if (diff < -0.05) {
-      avgEl.innerHTML = `${avgText}보다 ${trim1(-diff)}개비 적게 피우고 있었어요.`;
-    } else {
-      avgEl.innerHTML = `${avgText}과 거의 같았어요.`;
-    }
+    if (diff > 0.05) avgEl.innerHTML = `${avgText}보다 ${trim1(diff)}개비 더 피우고 있었어요.`;
+    else if (diff < -0.05) avgEl.innerHTML = `${avgText}보다 ${trim1(-diff)}개비 적게 피우고 있었어요.`;
+    else avgEl.innerHTML = `${avgText}과 거의 같았어요.`;
     avgEl.classList.remove('hidden');
     sources.push('평균 흡연량: 국가암정보센터');
   } else {
     avgEl.classList.add('hidden');
   }
 
-  // 나이에 따른 기대수명
   const age = getAge();
   if (age !== null) {
     const years = lifeGainedFor(age);
     if (years !== null) {
-      lifeEl.innerHTML =
-        `이 나이에 끊으면 계속 피우는 경우보다 <strong>약 ${years}년</strong>을 더 사는 것으로 나타났어요.`;
+      lifeEl.innerHTML = `이 나이에 끊으면 계속 피우는 경우보다 <strong>약 ${years}년</strong>을 더 사는 것으로 나타났어요.`;
       sources.push('기대수명: NEJM 2013');
     } else if (age < 25) {
-      lifeEl.innerHTML =
-        `40세 이전에 끊으면 흡연으로 늘어나는 사망 위험의 <strong>약 90%</strong>를 피할 수 있어요.`;
+      lifeEl.innerHTML = `40세 이전에 끊으면 흡연으로 늘어나는 사망 위험의 <strong>약 90%</strong>를 피할 수 있어요.`;
       sources.push('기대수명: NEJM 2013');
     } else {
       lifeEl.innerHTML = '금연의 이득은 시작하는 나이와 상관없이 남아요.';
@@ -428,28 +448,111 @@ function renderInsight() {
     srcEl.classList.add('hidden');
   }
 
-  $('insight').classList.toggle('hidden', avgEl.classList.contains('hidden') && lifeEl.classList.contains('hidden'));
+  box.classList.toggle('hidden', avgEl.classList.contains('hidden') && lifeEl.classList.contains('hidden'));
 }
+
+// ===== 홈 화면 (브라우저로 열었을 때만 보이는 부분) =====
+
+// 첫 화면 문장 아래의 숫자. 세는 중인 습관이 있으면 그 일수를 보여준다.
+function renderHero() {
+  const el = $('heroCount');
+  if (!el) return;
+  const day = currentDay();
+  if (day > 0) {
+    el.innerHTML = `<strong>${comma(day)}일째</strong> ${H().name} 없이 지내는 중`;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+// 습관 목록 격자. 세는 중인 습관에는 며칠째인지 붙는다.
+function renderHub() {
+  const grid = $('habitGrid');
+  if (!grid) return;
+  grid.textContent = '';
+
+  const active = [];
+
+  for (const cat of HABIT_CATEGORIES) {
+    const section = document.createElement('section');
+    section.className = 'hub-cat';
+
+    const head = document.createElement('div');
+    head.className = 'hub-cat-head';
+    head.innerHTML = `<h3>${cat.label}</h3><span>${cat.lead}</span>`;
+    section.appendChild(head);
+
+    const list = document.createElement('div');
+    list.className = 'hub-list';
+
+    for (const h of habitsInCategory(cat.id)) {
+      const day = dayFor(getStartDate(h.id));
+      if (day > 0) active.push({ h, day });
+
+      const tile = document.createElement('a');
+      tile.className = 'hub-tile' + (h.id === mode ? ' current' : '') + (day > 0 ? ' active' : '');
+      tile.href = `index.html?h=${h.id}`;
+      tile.dataset.habit = h.id;
+      tile.innerHTML =
+        `<span class="hub-emoji">${h.emoji}</span>` +
+        `<span class="hub-name">${h.name}</span>` +
+        `<span class="hub-tag">${day > 0 ? `<b>${comma(day)}일째</b>` : h.tagline}</span>`;
+      list.appendChild(tile);
+    }
+
+    section.appendChild(list);
+    grid.appendChild(section);
+  }
+
+  // 세는 중인 습관 요약
+  const strip = $('activeStrip');
+  if (strip) {
+    if (active.length) {
+      strip.innerHTML = '<span class="active-label">세는 중</span>' + active.map(({ h, day }) =>
+        `<a class="active-chip" href="index.html?h=${h.id}" data-habit="${h.id}">${h.emoji} ${h.name} <b>${comma(day)}일째</b></a>`
+      ).join('');
+      strip.classList.remove('hidden');
+    } else {
+      strip.classList.add('hidden');
+    }
+  }
+}
+
+// 홈의 습관 타일과 칩은 새 페이지로 가지 않고 위의 카운터를 바꾼다
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-habit]');
+  if (!a || !HABITS[a.dataset.habit]) return;
+  e.preventDefault();
+  switchMode(a.dataset.habit);
+  const w = $('widget');
+  if (w && document.body.classList.contains('web')) {
+    w.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
 
 // ===== 축하 =====
 
 function showCelebration(day) {
-  const m = M();
+  const h = H();
   const special = isSpecial(day);
+  const p = perDay();
 
   $('celeBadge').textContent = special && CONFIG.specialMessage
     ? CONFIG.specialMessage(day)
     : `${comma(day)}일`;
   $('celeTitle').textContent = special ? `${comma(day)}일 달성!` : '축하합니다!';
   $('celeMsg').textContent = milestoneMessage(day);
-  $('celeSub').textContent =
-    `지금까지 ${comma(day * m.moneyPerDay())}원을 아꼈고, ` + m.celebrateText(day * m.countPerDay());
+
+  const main = isTime()
+    ? `지금까지 ${fmtMinutes(day * unitPerDay())}을 되찾았고, `
+    : `지금까지 ${comma(day * unitPerDay())}원을 아꼈고, `;
+  $('celeSub').textContent = main + h.celebrateText(day * (p.count || 0));
 
   $('celebration').classList.toggle('special', special);
   $('celebration').classList.remove('hidden');
 
   if (special) {
-    // 100일 단위는 더 오래, 더 많이 터뜨린다
     particles.confetti(240, true);
     for (const delay of [500, 1000, 1600, 2300, 3100]) {
       setTimeout(() => particles.confetti(180, true), delay);
@@ -461,7 +564,6 @@ function showCelebration(day) {
   }
 }
 
-// 오늘이 마일스톤이고 아직 축하를 안 봤다면 띄운다
 function checkMilestone() {
   const day = currentDay();
   if (!isMilestone(day)) return;
@@ -470,7 +572,6 @@ function checkMilestone() {
   showCelebration(day);
 }
 
-// 시작일을 바꾼 직후에 축하가 튀어나오지 않도록 눌러둔다
 function suppressTodayCelebration() {
   set('celebrated', String(currentDay()));
 }
@@ -480,10 +581,9 @@ function suppressTodayCelebration() {
 const particles = (function () {
   const canvas = $('confetti');
   const ctx = canvas.getContext('2d');
-  const colors = ['#4ade80', '#facc15', '#60a5fa', '#f472b6', '#fb923c', '#ffffff'];
-  // 100일 단위 축하는 금색 위주로 터진다
-  const goldColors = ['#facc15', '#fbbf24', '#fde68a', '#f59e0b', '#ffffff', '#4ade80'];
-  const ashColors = ['#6b7681', '#8a949c', '#4d565e', '#9aa4ab'];
+  const colors = ['#1e6b4b', '#e4632d', '#f2b544', '#3b82f6', '#ec4899', '#15211b'];
+  const goldColors = ['#f2b544', '#fbbf24', '#fde68a', '#e4632d', '#ffffff', '#1e6b4b'];
+  const ashColors = ['#8a949c', '#a3adb4', '#6b7681', '#b9c1c7'];
   let items = [];
   let running = false;
   let ashTimer = null;
@@ -543,7 +643,6 @@ const particles = (function () {
 
   function ashOff() {
     if (ashTimer) { clearInterval(ashTimer); ashTimer = null; }
-    // 남아 있는 잿가루는 빠르게 사라지게 한다
     for (const p of items) { if (p.kind === 'ash') p.fading = true; }
   }
 
@@ -567,8 +666,8 @@ const particles = (function () {
         ctx.fill();
         ctx.restore();
       } else {
-        p.vy += 0.28;    // 중력
-        p.vx *= 0.995;   // 공기 저항
+        p.vy += 0.28;
+        p.vx *= 0.995;
         p.x += p.vx;
         p.y += p.vy;
         p.rot += p.vr;
@@ -610,7 +709,6 @@ function setSeg(id, value) {
 
 function getSeg(id) { return $(id).dataset.value || ''; }
 
-// 선택 항목이라 이미 고른 버튼을 다시 누르면 해제된다
 function initSeg(id, onChange, allowToggleOff) {
   $(id).addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-v]');
@@ -623,21 +721,86 @@ function initSeg(id, onChange, allowToggleOff) {
   });
 }
 
+// ===== 습관별 입력칸 =====
+// 첫 설정과 설정 화면은 같은 입력칸을 쓴다. prefix 로 id 만 구분한다.
+
+function fieldId(prefix, key) { return `${prefix}_${key}`; }
+
+function buildFields(container, prefix) {
+  container.textContent = '';
+  const fields = H().fields || [];
+
+  // 숫자 칸 두 개는 한 줄에 나란히
+  let row = null;
+  for (const f of fields) {
+    const label = document.createElement('label');
+    label.className = 'field';
+    label.innerHTML = `<span>${f.label}</span>`;
+
+    const input = document.createElement('input');
+    input.id = fieldId(prefix, f.key);
+    input.type = f.type === 'time' ? 'time' : 'number';
+    if (f.type !== 'time') {
+      if (f.min !== undefined) input.min = String(f.min);
+      if (f.max !== undefined) input.max = String(f.max);
+      if (f.step !== undefined) input.step = String(f.step);
+      if (f.inputmode) input.inputMode = f.inputmode;
+    }
+    label.appendChild(input);
+
+    if (fields.length === 2 && !f.note) {
+      if (!row) { row = document.createElement('div'); row.className = 'field-row'; container.appendChild(row); }
+      row.appendChild(label);
+    } else {
+      container.appendChild(label);
+    }
+
+    if (f.note) {
+      const note = document.createElement('p');
+      note.className = 'field-note';
+      note.textContent = f.note;
+      container.appendChild(note);
+    }
+  }
+}
+
+function fillFields(prefix, useSaved) {
+  for (const f of H().fields || []) {
+    const el = $(fieldId(prefix, f.key));
+    if (!el) continue;
+    const saved = useSaved ? get(f.key) : null;
+    el.value = (saved !== null && saved !== '') ? saved : String(f.def);
+  }
+}
+
+// 입력값 검사 후 저장. 문제가 있으면 그 칸에 포커스를 주고 false 를 돌려준다.
+function saveFields(prefix) {
+  for (const f of H().fields || []) {
+    const el = $(fieldId(prefix, f.key));
+    if (!el) continue;
+    if (f.type === 'time') {
+      if (!/^\d{1,2}:\d{2}$/.test(el.value)) { el.focus(); return false; }
+      set(f.key, el.value);
+    } else {
+      const v = Number(el.value);
+      const minOk = f.min === undefined ? v >= 0 : v >= f.min;
+      if (!(el.value !== '' && !isNaN(v) && minOk)) { el.focus(); return false; }
+      set(f.key, String(v));
+    }
+  }
+  return true;
+}
+
 // ===== 첫 설정 / 설정 =====
 
-// 첫 설정에서는 성별을 고르면 평균 흡연량을 미리 채워준다
 initSeg('obGender', (v) => {
   const avg = averageCigsFor(v);
-  if (avg !== null) $('obCigs').value = String(avg);
+  const el = $(fieldId('ob', 'cigsPerDay'));
+  if (avg !== null && el) el.value = String(avg);
 }, true);
 
-// 설정 화면에서는 이미 넣어둔 값을 함부로 덮어쓰지 않는다
 initSeg('genderInput', null, true);
 
-// 탭은 항상 하나가 선택되어 있어야 하므로 해제를 막는다
-initSeg('modeTabs', (v) => { if (v) switchMode(v); }, false);
-
-// 성별·나이를 저장한다 (빈 값이면 지운다)
 function saveProfile(gender, ageText) {
   set('gender', gender);
   const age = Number(ageText);
@@ -645,35 +808,18 @@ function saveProfile(gender, ageText) {
 }
 
 function fillOnboarding() {
+  buildFields($('obFields'), 'ob');
+  fillFields('ob', false);
   $('obStart').value = toInputValue(new Date());
-  $('obPrice').value = String(CONFIG.pricePerPack);
-  $('obCigs').value = String(CONFIG.cigsPerDay);
   $('obAge').value = '';
   setSeg('obGender', '');
-  $('obFreq').value = String(CONFIG.drinksPerWeek);
-  $('obCost').value = String(CONFIG.costPerDrink);
 }
 
 $('obSave').addEventListener('click', () => {
   const d = parseDate($('obStart').value);
   if (!d) { $('obStart').focus(); return; }
-
-  if (mode === 'smoke') {
-    const price = Number($('obPrice').value);
-    const cigs = Number($('obCigs').value);
-    if (!(price >= 0)) { $('obPrice').focus(); return; }
-    if (!(cigs > 0)) { $('obCigs').focus(); return; }
-    set('pricePerPack', String(price));
-    set('cigsPerDay', String(cigs));
-    saveProfile(getSeg('obGender'), $('obAge').value);
-  } else {
-    const freq = Number($('obFreq').value);
-    const cost = Number($('obCost').value);
-    if (!(freq > 0)) { $('obFreq').focus(); return; }
-    if (!(cost >= 0)) { $('obCost').focus(); return; }
-    set('drinksPerWeek', String(freq));
-    set('costPerDrink', String(cost));
-  }
+  if (!saveFields('ob')) return;
+  if (H().profile) saveProfile(getSeg('obGender'), $('obAge').value);
 
   setStartDate(d);
   closeOverlay('onboarding');
@@ -682,15 +828,12 @@ $('obSave').addEventListener('click', () => {
 });
 
 $('settingsBtn').addEventListener('click', () => {
+  buildFields($('setFields'), 'set');
+  fillFields('set', true);
   $('startInput').value = toInputValue(getStartDate() || new Date());
-  if (mode === 'smoke') {
-    $('priceInput').value = String(getNum('pricePerPack', CONFIG.pricePerPack));
-    $('cigsInput').value = String(getNum('cigsPerDay', CONFIG.cigsPerDay));
+  if (H().profile) {
     setSeg('genderInput', getGender());
     $('ageInput').value = getAge() === null ? '' : String(getAge());
-  } else {
-    $('freqInput').value = String(getNum('drinksPerWeek', CONFIG.drinksPerWeek));
-    $('costInput').value = String(getNum('costPerDrink', CONFIG.costPerDrink));
   }
   openOverlay('settings');
 });
@@ -700,23 +843,8 @@ $('settingsCancel').addEventListener('click', () => closeOverlay('settings'));
 $('settingsSave').addEventListener('click', () => {
   const d = parseDate($('startInput').value);
   if (!d) { $('startInput').focus(); return; }
-
-  if (mode === 'smoke') {
-    const price = Number($('priceInput').value);
-    const cigs = Number($('cigsInput').value);
-    if (!(price >= 0)) { $('priceInput').focus(); return; }
-    if (!(cigs > 0)) { $('cigsInput').focus(); return; }
-    set('pricePerPack', String(price));
-    set('cigsPerDay', String(cigs));
-    saveProfile(getSeg('genderInput'), $('ageInput').value);
-  } else {
-    const freq = Number($('freqInput').value);
-    const cost = Number($('costInput').value);
-    if (!(freq > 0)) { $('freqInput').focus(); return; }
-    if (!(cost >= 0)) { $('costInput').focus(); return; }
-    set('drinksPerWeek', String(freq));
-    set('costPerDrink', String(cost));
-  }
+  if (!saveFields('set')) return;
+  if (H().profile) saveProfile(getSeg('genderInput'), $('ageInput').value);
 
   setStartDate(d);
   suppressTodayCelebration();
@@ -732,14 +860,13 @@ $('failBtn').addEventListener('click', () => {
   const day = Math.max(currentDay(), 0);
   $('failConfirmMsg').textContent =
     day > 0
-      ? `지금까지 쌓은 ${comma(day)}일과 ${comma(day * M().moneyPerDay())}원 기록이 사라지고 처음부터 다시 시작해요.`
+      ? `지금까지 쌓은 ${comma(day)}일과 ${fmtMain(day * unitPerDay())} 기록이 사라지고 처음부터 다시 시작해요.`
       : '기록을 처음부터 다시 설정해요.';
   openOverlay('failConfirm');
 });
 
 $('failCancel').addEventListener('click', () => closeOverlay('failConfirm'));
 
-// 실패 확정 → 슬픈 연출 + 재시작 날짜 묻기
 $('failOk').addEventListener('click', () => {
   closeOverlay('failConfirm');
   $('widget').classList.add('grieving');
@@ -759,14 +886,15 @@ $('restartSave').addEventListener('click', () => {
   render();
 });
 
-// ===== 탭 전환 =====
+// ===== 습관 바꾸기 =====
 
 function switchMode(next) {
-  if (!MODES[next] || next === mode) return;
+  if (!HABITS[next]) return;
+  closeHabitMenu();
+  if (next === mode) return;
   mode = next;
   writeStore(KEY_MODE, mode);
 
-  // 열려 있던 화면은 모두 닫고 새 모드 기준으로 다시 그린다
   for (const id of ['celebration', 'settings', 'failConfirm', 'failRestart', 'onboarding']) {
     closeOverlay(id);
   }
@@ -784,8 +912,59 @@ function switchMode(next) {
   }
 }
 
+// 습관 선택 메뉴
+function buildHabitMenu() {
+  const menu = $('habitMenu');
+  if (!menu) return;
+  menu.textContent = '';
+  for (const cat of HABIT_CATEGORIES) {
+    const group = document.createElement('div');
+    group.className = 'habit-group';
+    group.innerHTML = `<div class="habit-group-label">${cat.label}</div>`;
+    for (const h of habitsInCategory(cat.id)) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.habit = h.id;
+      b.setAttribute('role', 'menuitem');
+      if (h.id === mode) b.classList.add('active');
+      const day = dayFor(getStartDate(h.id));
+      b.innerHTML = `<span>${h.emoji}</span><span class="habit-item-name">${h.name}</span>` +
+        (day > 0 ? `<span class="habit-item-day">${comma(day)}일째</span>` : '');
+      b.addEventListener('click', () => switchMode(h.id));
+      group.appendChild(b);
+    }
+    menu.appendChild(group);
+  }
+}
+
+function openHabitMenu() {
+  buildHabitMenu();
+  $('habitMenu').classList.remove('hidden');
+  $('habitBtn').setAttribute('aria-expanded', 'true');
+}
+
+function closeHabitMenu() {
+  const m = $('habitMenu');
+  if (!m) return;
+  m.classList.add('hidden');
+  $('habitBtn').setAttribute('aria-expanded', 'false');
+}
+
+$('habitBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if ($('habitMenu').classList.contains('hidden')) openHabitMenu();
+  else closeHabitMenu();
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#habitMenu') && !e.target.closest('#habitBtn')) closeHabitMenu();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeHabitMenu();
+});
+
 // ===== 자동 실행 안내 배너 =====
-// 앱으로 설치해서 열었다면 이미 목적을 달성한 상태이므로 배너를 띄우지 않는다.
 
 const KEY_BANNER = 'qs.bannerDismissed';
 
@@ -798,31 +977,34 @@ function isStandalone() {
 function initInstallBanner() {
   const standalone = isStandalone();
 
-  // 브라우저로 열었을 때만 카운터 아래에 소개 글을 펼친다
+  // 브라우저로 열었을 때만 카운터 주변에 사이트 홈이 펼쳐진다
   document.body.classList.toggle('web', !standalone);
 
-  // 설치한 사람에게는 남은 할 일이 '자동 실행 켜기'뿐이다
   $('ghostBtn').textContent = standalone ? '자동 실행 설정' : '데스크탑에 설치';
   $('ghostBtn').href = standalone ? 'install.html#autostart' : 'install.html';
 
   const show = !standalone && readStore(KEY_BANNER) !== '1';
-  $('installBanner').classList.toggle('hidden', !show);
+  setIfPresent('installBanner', (el) => el.classList.toggle('hidden', !show));
   document.body.classList.toggle('has-banner', show);
 }
 
-$('bannerClose').addEventListener('click', () => {
+setIfPresent('bannerClose', (el) => el.addEventListener('click', () => {
   writeStore(KEY_BANNER, '1');
   $('installBanner').classList.add('hidden');
   document.body.classList.remove('has-banner');
-});
+}));
 
 // ===== 시작 =====
 
 migrateOldKeys();
 initInstallBanner();
 
+// 주소에 ?h=coffee 처럼 습관이 적혀 있으면 그걸 먼저 연다
+const urlHabit = (location.search.match(/[?&]h=([a-z]+)/) || [])[1];
 const savedMode = readStore(KEY_MODE);
-if (MODES[savedMode]) mode = savedMode;
+if (HABITS[urlHabit]) mode = urlHabit;
+else if (HABITS[savedMode]) mode = savedMode;
+if (urlHabit && HABITS[urlHabit]) writeStore(KEY_MODE, mode);
 
 applyModeLabels();
 render();
@@ -830,13 +1012,11 @@ render();
 if (getStartDate()) {
   setTimeout(checkMilestone, 600);
 } else {
-  // 처음 여는 사람에게는 설정부터 묻는다
   fillOnboarding();
   openOverlay('onboarding');
 }
 
 // 남은 시간은 분 단위로 보여주므로 30초마다 다시 그린다.
-// 구간을 막 넘긴 경우에는 전체를 다시 계산해야 다음 구간으로 넘어간다.
 setInterval(() => {
   const next = renderSnowNext.next;
   if (!next) return;
@@ -852,7 +1032,6 @@ setInterval(() => {
   }
 }, 60000);
 
-// 오프라인에서도 열리도록 서비스 워커 등록 (file://에서는 건너뜀)
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => { /* 무시 */ });
