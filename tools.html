@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>금연·금주 미니 도구 — 오늘만 하고 끊을게</title>
-<meta name="description" content="숨참기 챌린지와 생활습관으로 보는 추정 신체 나이. 금연과 금주를 이어가는 데 도움이 되는 미니 도구 두 가지.">
+<title>미니 도구 — 숨참기, 설탕 계산기, 시간 계산기, 추정 신체 나이</title>
+<meta name="description" content="숨참기 챌린지, 음료 속 설탕을 각설탕으로 환산하는 계산기, 하루 몇 분이 1년에 며칠인지 보는 시간 계산기, 생활습관으로 보는 추정 신체 나이. 습관을 바꾸는 데 도움이 되는 미니 도구 네 가지.">
 <meta name="theme-color" content="#f4f6f3">
 <link rel="icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=20260905a">
+<link rel="stylesheet" href="style.css?v=20260905c">
 <link rel="canonical" href="https://todayquit.com/tools.html">
 <meta property="og:site_name" content="오늘만 하고 끊을게">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://todayquit.com/tools.html">
 <meta property="og:title" content="금연·금주 미니 도구 — 오늘만 하고 끊을게">
-<meta property="og:description" content="숨참기 챌린지와 생활습관으로 보는 추정 신체 나이.">
+<meta property="og:description" content="숨참기, 설탕 계산기, 시간 계산기, 추정 신체 나이. 미니 도구 네 가지.">
 <meta property="og:image" content="https://todayquit.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211829862421684" crossorigin="anonymous"></script>
@@ -34,15 +34,17 @@
     </nav>
   </header>
 
-  <h1>금연·금주 미니 도구</h1>
+  <h1>미니 도구</h1>
   <p class="updated">최종 수정일: 2026년 8월 18일</p>
 
-  <p>버티는 데 도움이 되는 작은 도구 두 가지입니다. 전부 브라우저 안에서만 계산되며 아무것도 저장하거나 전송하지 않습니다.</p>
+  <p>버티는 데 도움이 되는 작은 도구 네 가지입니다. 전부 브라우저 안에서만 계산되며 아무것도 저장하거나 전송하지 않습니다.</p>
 
   <p>아낀 돈이 앞으로 얼마나 쌓이는지는 <a href="index.html">카운터</a> 화면에서 바로 볼 수 있습니다. 1개월·6개월·1년·5년 뒤의 금액과 각 시점까지 남은 시간이 함께 나옵니다.</p>
 
   <div id="toolTabs" class="tool-tabs" data-value="breath">
     <button type="button" data-v="breath">🫁 숨참기</button>
+    <button type="button" data-v="sugar">🍬 설탕</button>
+    <button type="button" data-v="time">⏳ 시간</button>
     <button type="button" data-v="age">🏥 신체 나이</button>
   </div>
 
@@ -118,7 +120,83 @@
     </div>
   </section>
 
-  <!-- ===== 탭 2: 추정 신체 나이 ===== -->
+  <!-- ===== 탭 2: 설탕 계산기 ===== -->
+  <section id="panelSugar" class="tool-panel hidden">
+    <h2>내가 마시는 음료, 각설탕으로 몇 개</h2>
+
+    <p>음료의 당류를 <strong>각설탕(3g)</strong> 개수로 바꿔 보여줍니다. 하루치와 1년치, 그리고 세계보건기구가 권하는 하루 상한(성인 약 25g)과 비교합니다.</p>
+
+    <label class="field">
+      <span>무엇을 마시나요</span>
+      <select id="sugarDrink" class="tool-select"></select>
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span>하루 몇 개</span>
+        <input id="sugarCount" type="number" min="0.5" max="30" step="0.5" value="1" inputmode="decimal">
+      </label>
+      <label class="field" id="sugarCustomWrap">
+        <span>1개당 당류 (g)</span>
+        <input id="sugarCustom" type="number" min="0" max="200" step="1" value="27" inputmode="numeric">
+      </label>
+    </div>
+    <p class="field-note">직접 입력하려면 목록에서 "직접 입력"을 고르고 제품 뒷면의 당류(g)를 넣으세요.</p>
+
+    <div class="age-pair">
+      <div class="age-box">
+        <span class="age-box-label">하루 당류</span>
+        <span id="sugarDayG" class="age-box-value">27</span><span class="age-box-unit">g</span>
+        <div class="tool-sub">각설탕 <b id="sugarDayCubes">9</b>개</div>
+      </div>
+      <div class="age-box">
+        <span class="age-box-label">1년이면</span>
+        <span id="sugarYearKg" class="age-box-value">9.9</span><span class="age-box-unit">kg</span>
+        <div class="tool-sub">각설탕 <b id="sugarYearCubes">3,285</b>개</div>
+      </div>
+    </div>
+
+    <p id="sugarVsWho" class="tool-verdict"></p>
+
+    <div class="notice">
+      <p>목록의 당류 값은 대표 제품 기준의 <strong>대략적인 값</strong>이며 제품과 용량에 따라 다릅니다. 정확한 값은 제품 영양성분 표기의 "당류"를 보세요. WHO 권고는 자유당(첨가당·꿀·주스 속 당) 기준이며, 하루 총 열량의 5% 미만이 이상적이라는 내용을 성인 평균 열량으로 환산한 값입니다.</p>
+      <p>탄산을 끊기로 했다면 <a href="quit-soda.html">탄산 끊기 안내</a>와 <a href="index.html?h=soda">카운터</a>를 써보세요.</p>
+    </div>
+  </section>
+
+  <!-- ===== 탭 3: 시간 계산기 ===== -->
+  <section id="panelTime" class="tool-panel hidden">
+    <h2>하루 몇 분이 1년이면 며칠</h2>
+
+    <p>릴스, 게임, 담배 피우러 나가는 시간. 하루에 쓰는 분 수를 넣으면 1년에 며칠인지, 그 시간으로 무엇을 할 수 있었는지 보여줍니다.</p>
+
+    <label class="field">
+      <span>하루에 쓰는 시간 (분)</span>
+      <input id="timeMin" type="number" min="1" max="1440" step="5" value="90" inputmode="numeric">
+    </label>
+    <p class="field-note">휴대폰 설정의 스크린타임(아이폰) 또는 디지털 웰빙(안드로이드)에서 앱별 사용 시간을 볼 수 있어요.</p>
+
+    <div class="age-pair">
+      <div class="age-box">
+        <span class="age-box-label">1년에</span>
+        <span id="timeYearHours" class="age-box-value">548</span><span class="age-box-unit">시간</span>
+        <div class="tool-sub">24시간 기준 <b id="timeYearDays">23</b>일</div>
+      </div>
+      <div class="age-box">
+        <span class="age-box-label">깨어 있는 시간으로 치면</span>
+        <span id="timeYearWakeDays" class="age-box-value">34</span><span class="age-box-unit">일</span>
+        <div class="tool-sub">하루 16시간 기준</div>
+      </div>
+    </div>
+
+    <h3>그 시간이면</h3>
+    <div id="timeList" class="dday-list"></div>
+
+    <div class="notice">
+      <p>환산 기준은 각 줄에 적어두었습니다. 대략의 감을 잡기 위한 계산이며 실제 소요 시간은 사람마다 다릅니다. 끊기로 했다면 <a href="quit-reels.html">릴스·쇼츠 끊기</a>, <a href="quit-game.html">게임 끊기</a> 안내를 읽어보세요. 카운터는 되찾은 시간을 매일 세어줍니다.</p>
+    </div>
+  </section>
+  <!-- ===== 탭 4: 추정 신체 나이 ===== -->
   <section id="panelAge" class="tool-panel hidden">
     <h2>생활습관으로 보는 추정 신체 나이</h2>
 
@@ -225,7 +303,7 @@
   </footer>
 </div>
 
-<script src="tools.js?v=20260905a"></script>
+<script src="tools.js?v=20260905c"></script>
 </body>
 </html>
 

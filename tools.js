@@ -30,7 +30,7 @@ function getSeg(id) { return $(id).dataset.value; }
 
 // ===== 탭 전환 =====
 
-const PANELS = { breath: 'panelBreath', age: 'panelAge' };
+const PANELS = { breath: 'panelBreath', sugar: 'panelSugar', time: 'panelTime', age: 'panelAge' };
 
 initSeg('toolTabs', (v) => {
   for (const key of Object.keys(PANELS)) {
@@ -219,3 +219,100 @@ $('ageCalc').addEventListener('click', () => {
   $('ageResult').classList.remove('hidden');
   $('ageResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+// ===== 탭 2: 설탕 계산기 =====
+// 당류(g)는 대표 제품 기준의 대략값. 각설탕 하나를 3g 으로 잡는다.
+
+const DRINKS = [
+  { name: '콜라 250ml 캔', g: 27 },
+  { name: '콜라 500ml 페트', g: 54 },
+  { name: '사이다 250ml 캔', g: 26 },
+  { name: '에너지음료 250ml', g: 27 },
+  { name: '스포츠음료 500ml', g: 30 },
+  { name: '오렌지주스 200ml', g: 20 },
+  { name: '초코우유 200ml', g: 22 },
+  { name: '캔커피 200ml', g: 15 },
+  { name: '바닐라라떼 (톨)', g: 30 },
+  { name: '버블티 (레귤러)', g: 40 },
+  { name: '직접 입력', g: null },
+];
+const CUBE_G = 3;
+const WHO_DAY_G = 25;
+
+function initSugar() {
+  const sel = $('sugarDrink');
+  if (!sel) return;
+  DRINKS.forEach((d, i) => {
+    const o = document.createElement('option');
+    o.value = String(i);
+    o.textContent = d.g === null ? d.name : `${d.name} — 약 ${d.g}g`;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', renderSugar);
+  $('sugarCount').addEventListener('input', renderSugar);
+  $('sugarCustom').addEventListener('input', renderSugar);
+  renderSugar();
+}
+
+function renderSugar() {
+  const d = DRINKS[Number($('sugarDrink').value) || 0];
+  const custom = d.g === null;
+  $('sugarCustomWrap').classList.toggle('hidden', !custom);
+  const perOne = custom ? (Number($('sugarCustom').value) || 0) : d.g;
+  const count = Number($('sugarCount').value) || 0;
+  const dayG = perOne * count;
+  const yearG = dayG * 365;
+
+  $('sugarDayG').textContent = comma(Math.round(dayG));
+  $('sugarDayCubes').textContent = comma(Math.round(dayG / CUBE_G));
+  $('sugarYearKg').textContent = (Math.round(yearG / 100) / 10).toString();
+  $('sugarYearCubes').textContent = comma(Math.round(yearG / CUBE_G));
+
+  const v = $('sugarVsWho');
+  if (dayG <= 0) { v.textContent = ''; return; }
+  const ratio = dayG / WHO_DAY_G;
+  v.innerHTML = ratio >= 1
+    ? `이 음료만으로 WHO 하루 권장 상한(약 ${WHO_DAY_G}g)의 <strong>${Math.round(ratio * 100)}%</strong>입니다. 다른 음식의 당은 세기도 전에요.`
+    : `이 음료는 WHO 하루 권장 상한(약 ${WHO_DAY_G}g)의 <strong>${Math.round(ratio * 100)}%</strong>입니다.`;
+}
+
+// ===== 탭 3: 시간 계산기 =====
+
+const TIME_ITEMS = [
+  { label: '영화', unit: '편', hours: 2, note: '한 편 2시간' },
+  { label: '책', unit: '권', hours: 6, note: '한 권 6시간' },
+  { label: '5km 달리기', unit: '번', hours: 0.5, note: '30분' },
+  { label: '외국어 기초 과정', unit: '번 완주', hours: 100, note: '약 100시간' },
+  { label: '서울–부산 왕복 운전', unit: '번', hours: 10, note: '약 10시간' },
+];
+
+function initTime() {
+  const el = $('timeMin');
+  if (!el) return;
+  el.addEventListener('input', renderTime);
+  renderTime();
+}
+
+function renderTime() {
+  const min = Number($('timeMin').value) || 0;
+  const yearHours = (min * 365) / 60;
+  $('timeYearHours').textContent = comma(Math.round(yearHours));
+  $('timeYearDays').textContent = comma(Math.round(yearHours / 24));
+  $('timeYearWakeDays').textContent = comma(Math.round(yearHours / 16));
+
+  const box = $('timeList');
+  box.textContent = '';
+  for (const it of TIME_ITEMS) {
+    const n = yearHours / it.hours;
+    const row = document.createElement('div');
+    row.className = 'dday-row';
+    row.innerHTML =
+      `<span class="dday-when">${it.label}</span>` +
+      `<span class="dday-date">${it.note}</span>` +
+      `<span class="dday-text"><strong>${n >= 10 ? comma(Math.round(n)) : (Math.round(n * 10) / 10)}</strong>${it.unit}</span>`;
+    box.appendChild(row);
+  }
+}
+
+initSugar();
+initTime();

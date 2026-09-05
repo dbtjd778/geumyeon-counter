@@ -492,7 +492,8 @@ function renderHub() {
 
       const tile = document.createElement('a');
       tile.className = 'hub-tile' + (h.id === mode ? ' current' : '') + (day > 0 ? ' active' : '');
-      tile.href = `index.html?h=${h.id}`;
+      // 안내 페이지가 있으면 그 주소를 건다(검색엔진이 따라가도록). 클릭은 위의 카운터를 바꾼다.
+      tile.href = h.guideHref && h.guideHref.startsWith('quit-') ? h.guideHref : `index.html?h=${h.id}`;
       tile.dataset.habit = h.id;
       tile.innerHTML =
         `<span class="hub-emoji">${h.emoji}</span>` +
