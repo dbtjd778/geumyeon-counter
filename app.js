@@ -828,6 +828,20 @@ $('obSave').addEventListener('click', () => {
   checkMilestone();
 });
 
+// 첫 설정을 닫으면: 다른 습관에서 넘어온 거면 그 습관으로 되돌아가고,
+// 아니면 빈 카운터를 그대로 보여준다(습관을 다시 누르면 첫 설정이 다시 뜬다).
+function cancelOnboarding() {
+  closeOverlay('onboarding');
+  const back = switchMode.from;
+  switchMode.from = null;
+  if (back && back !== mode && HABITS[back] && getStartDate(back)) switchMode(back);
+}
+
+$('obCancel').addEventListener('click', cancelOnboarding);
+$('onboarding').addEventListener('click', (e) => {
+  if (e.target === $('onboarding')) cancelOnboarding();
+});
+
 $('settingsBtn').addEventListener('click', () => {
   buildFields($('setFields'), 'set');
   fillFields('set', true);
@@ -892,7 +906,15 @@ $('restartSave').addEventListener('click', () => {
 function switchMode(next) {
   if (!HABITS[next]) return;
   closeHabitMenu();
-  if (next === mode) return;
+  if (next === mode) {
+    // 같은 습관을 다시 눌렀는데 아직 시작 전이면 첫 설정을 다시 띄운다
+    if (!getStartDate() && $('onboarding').classList.contains('hidden')) {
+      fillOnboarding();
+      openOverlay('onboarding');
+    }
+    return;
+  }
+  switchMode.from = getStartDate() ? mode : null;
   mode = next;
   writeStore(KEY_MODE, mode);
 
@@ -962,7 +984,9 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeHabitMenu();
+  if (e.key !== 'Escape') return;
+  closeHabitMenu();
+  if (!$('onboarding').classList.contains('hidden')) cancelOnboarding();
 });
 
 // ===== 자동 실행 안내 배너 =====
