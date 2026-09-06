@@ -250,11 +250,32 @@ function renderResult(type) {
   return true;
 }
 
+// 주소에 유형 글자가 그대로 드러나지 않도록 짧은 코드로 바꿔서 주고받는다.
+// 값은 한 번 정하면 바꾸지 말 것 — 이미 공유된 링크가 안 열리게 된다.
+const RESULT_CODES = {
+  ISTJ: 'b3q8k', ISFJ: 'e7t2m', INFJ: 'g2w5c', INTJ: 'j8z3n',
+  ISTP: 'm6h9p', ISFP: 'p3k4v', INFP: 'r9n7b', INTP: 'u5c2g',
+  ESTP: 'w2p6j', ESFP: 'z8s3q', ENFP: 'c4m9t', ENTP: 'f6b2z',
+  ESTJ: 'h9v4d', ESFJ: 'k2g7r', ENFJ: 'n5j8w', ENTJ: 'q7d3m',
+};
+
+function codeFor(type) {
+  return RESULT_CODES[type] || type;
+}
+
+function typeForCode(code) {
+  const lower = String(code).toLowerCase();
+  for (const t in RESULT_CODES) {
+    if (RESULT_CODES[t] === lower) return t;
+  }
+  return String(code).toUpperCase();  // 코드를 쓰기 전에 공유된 링크도 계속 열리게
+}
+
 function finish() {
   const type = scoreType();
   renderResult(type);
   try {
-    history.replaceState(null, '', `${location.pathname}?r=${type}`);
+    history.replaceState(null, '', `${location.pathname}?r=${codeFor(type)}`);
   } catch (e) { /* 무시 */ }
 }
 
@@ -271,8 +292,9 @@ function restart() {
 const SITE_URL = 'https://todayquit.com/';
 
 function shareUrlFor(type) {
-  if (location.protocol === 'file:') return `${SITE_URL}test-food.html?r=${type}`;
-  return `${location.origin}${location.pathname}?r=${type}`;
+  const code = codeFor(type);
+  if (location.protocol === 'file:') return `${SITE_URL}test-food.html?r=${code}`;
+  return `${location.origin}${location.pathname}?r=${code}`;
 }
 
 function toast(message) {
@@ -323,8 +345,8 @@ $('retryBtn').addEventListener('click', restart);
 $('shareBtn').addEventListener('click', shareResult);
 
 (function initFromUrl() {
-  const m = location.search.match(/[?&]r=([A-Za-z]{4})/);
-  if (m && renderResult(m[1].toUpperCase())) {
+  const m = location.search.match(/[?&]r=([A-Za-z0-9]{4,8})/);
+  if (m && renderResult(typeForCode(m[1]))) {
     $('sharedNote').classList.remove('hidden');
   } else {
     show('screenStart');
