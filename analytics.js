@@ -8,8 +8,33 @@
 // 심리테스트 결과 코드도 보내지 않는다(주소의 ?r= 파라미터는 제거하고 보낸다).
 const GA_ID = 'G-2Q68SBLPF5';   // GA4 속성 'todayquit.com'
 
+// 내 방문은 세지 않기.
+// 주소 끝에 ?noga=1 을 붙여 한 번 열면 그 브라우저는 계속 제외된다(?noga=0 이면 해제).
+// IP가 아니라 브라우저에 표시를 남기는 방식이라, 회선 IP가 바뀌거나 휴대폰 데이터를 써도 그대로 유지된다.
+// 기기·브라우저마다 한 번씩 해줘야 한다.
+const OPT_OUT_KEY = 'qs.noAnalytics';
+
+(function handleOptOut() {
+  const m = location.search.match(/[?&]noga=([01])/);
+  if (!m) return;
+  try {
+    if (m[1] === '1') {
+      localStorage.setItem(OPT_OUT_KEY, '1');
+      alert('이 브라우저의 방문은 이제 통계에서 제외됩니다.\n\n해제하려면 주소 끝에 ?noga=0 을 붙여 여세요.');
+    } else {
+      localStorage.removeItem(OPT_OUT_KEY);
+      alert('이 브라우저의 통계 제외를 해제했습니다.\n\n이제 이 브라우저의 방문도 통계에 들어갑니다.');
+    }
+  } catch (e) { /* 저장소를 못 쓰는 환경이면 그냥 넘어간다 */ }
+})();
+
 (function () {
   if (!GA_ID) return;
+
+  // 제외 표시가 있는 브라우저면 아예 보내지 않는다
+  try {
+    if (localStorage.getItem(OPT_OUT_KEY) === '1') return;
+  } catch (e) { /* 저장소를 못 읽으면 평소대로 진행 */ }
 
   // 설치된 앱을 파일로 여는 경우(file://)와 개발용 주소에서는 보내지 않는다
   if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
