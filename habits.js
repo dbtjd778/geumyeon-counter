@@ -21,6 +21,63 @@ const HABIT_CATEGORIES = [
   { id: 'life', label: '생활습관', lead: '시간과 돈이 새는 곳' },
 ];
 
+// ===== 칼로리로 세는 습관(밀가루·간식)에서 쓰는 값 =====
+// 1회 섭취 기준의 어림값이다. 제품마다 차이가 크므로 정확한 수치가 아니라
+// "대충 이 정도"를 보여주는 용도로만 쓴다.
+//
+// 환산 기준
+//   러닝머신 걷기 1시간 ≈ 330kcal
+//   1만 걸음 ≈ 350kcal
+//   체지방 1kg ≈ 7,700kcal
+
+const KCAL_PER_TREADMILL_HOUR = 330;
+const KCAL_PER_10K_STEPS = 350;
+const KCAL_PER_FAT_KG = 7700;
+
+const FLOUR_KINDS = {
+  bread: { kcal: 400, cubes: 12, won: 6000 },
+  noodle: { kcal: 500, cubes: 15, won: 2000 },
+  delivery: { kcal: 750, cubes: 20, won: 15000 },
+};
+
+const SNACK_KINDS = {
+  store: { kcal: 350, won: 4000 },
+  drink: { kcal: 450, won: 6000 },
+  dessert: { kcal: 650, won: 12000 },
+};
+
+// 칼로리 → "3시간 20분" (러닝머신 걷기 기준)
+function treadmillText(kcal) {
+  const mins = Math.round((kcal / KCAL_PER_TREADMILL_HOUR) * 60);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0 && m > 0) return comma(h) + '시간 ' + m + '분';
+  if (h > 0) return comma(h) + '시간';
+  return m + '분';
+}
+
+// 칼로리 → 체지방 kg (소수점 한 자리)
+function fatKg(kcal) {
+  return (Math.round((kcal / KCAL_PER_FAT_KG) * 10) / 10).toFixed(1);
+}
+
+// 아낀 돈이 넘어선 가장 큰 선. 넘은 게 없으면 null.
+const SNACK_REWARDS = [
+  { won: 1000000, text: '노트북 한 대 값' },
+  { won: 500000, text: '해외여행 항공권 값' },
+  { won: 300000, text: '무선 이어폰 하나' },
+  { won: 150000, text: '오마카세 예약 가능' },
+  { won: 50000, text: '치킨 세트 획득' },
+  { won: 20000, text: '영화 두 편' },
+];
+
+function snackReward(won) {
+  for (const r of SNACK_REWARDS) {
+    if (won >= r.won) return r.text;
+  }
+  return null;
+}
+
 const HABITS = {
   smoke: {
     id: 'smoke',
@@ -155,10 +212,12 @@ const HABITS = {
     verb: '밀가루 끊기',
     startLabel: '밀가루 끊은 날',
     failLabel: '먹었어요',
-    countLabel: '안 먹은 밀가루',
-    metric: 'money',
-    tagline: '빵·면·튀김, 주 5끼면 1년에 약 210만 원',
-    obLead: '빵, 면, 튀김처럼 밀가루가 들어간 끼니를 얼마나 먹었는지 넣어주세요.',
+    countLabel: '굳은 운동 시간',
+    metric: 'kcal',
+    kcalLabel: '방어한 칼로리',
+    showMilestone: true,
+    tagline: '빵 한 번이 러닝머신 약 1시간 13분',
+    obLead: '주로 먹던 밀가루 음식과 하루에 몇 번쯤 먹었는지 골라주세요.',
     guideHref: 'quit-flour.html',
     guideLabel: '밀가루 끊기 안내',
     testHref: 'test-food.html',
@@ -166,16 +225,23 @@ const HABITS = {
     testTitle: '식습관 성향 테스트',
     testSub: '눈앞의 햄버거, 나는 어떻게 하나',
     fields: [
-      { key: 'mealsPerWeek', label: '일주일에 몇 끼', type: 'number', min: 0.5, max: 21, step: 0.5, def: 5, inputmode: 'decimal' },
-      { key: 'costPerMeal', label: '한 끼 금액 (원)', type: 'number', min: 0, step: 500, def: 8000, inputmode: 'numeric',
-        note: '집밥으로 대체하면 실제로 아끼는 돈은 그 차액이에요. 대략의 값이면 충분해요.' },
+      { key: 'kind', label: '주로 먹던 것', type: 'select', def: 'bread', options: [
+        { v: 'bread', label: '빵·디저트류 — 약 400kcal / 6,000원' },
+        { v: 'noodle', label: '라면·면류 — 약 500kcal / 2,000원' },
+        { v: 'delivery', label: '피자·중식 등 배달 — 약 750kcal / 15,000원' },
+      ] },
+      { key: 'timesPerDay', label: '하루 평균 몇 번', type: 'number', min: 0.5, max: 10, step: 0.5, def: 1, inputmode: 'decimal',
+        note: '매일은 아니었다면 일주일 횟수를 7로 나눠 넣으세요. 주 3~4번이면 0.5입니다.' },
     ],
-    perDay: (num) => ({
-      money: (num('mealsPerWeek', 5) / 7) * num('costPerMeal', 8000),
-      count: num('mealsPerWeek', 5) / 7,
-    }),
-    countText: (n) => comma(Math.round(n)) + '끼',
-    celebrateText: (n) => `밀가루 ${comma(Math.round(n))}끼를 넘겼어요.`,
+    perDay: (num, get) => {
+      const t = FLOUR_KINDS[get('kind')] || FLOUR_KINDS.bread;
+      const c = num('timesPerDay', 1);
+      return { kcal: t.kcal * c, money: t.won * c, cubes: t.cubes * c, count: t.kcal * c };
+    },
+    countText: (n) => treadmillText(n),
+    subText: (day, p) => '아낀 돈 ' + comma(day * p.money) + '원',
+    extraText: (day, p) => '몸에 들어오지 않은 각설탕 <strong>' + comma(day * p.cubes) + '개</strong>',
+    celebrateText: (n) => `러닝머신 ${treadmillText(n)} 분량을 안 먹었어요.`,
   },
 
   snack: {
@@ -186,10 +252,12 @@ const HABITS = {
     verb: '간식 끊기',
     startLabel: '간식 끊은 날',
     failLabel: '먹었어요',
-    countLabel: '참은 간식',
-    metric: 'money',
-    tagline: '하루 두 번 2,500원이면 1년에 약 180만 원',
-    obLead: '과자, 빵, 편의점 군것질처럼 끼니 사이에 먹던 것을 세어요.',
+    countLabel: '굳은 걸음 수',
+    metric: 'kcal',
+    kcalLabel: '방어한 체지방',
+    showMilestone: true,
+    tagline: '편의점 과자 하루 한 번이면 1년에 약 12만 kcal',
+    obLead: '주로 먹던 간식과 하루에 몇 번쯤 먹었는지 골라주세요.',
     guideHref: 'quit-snack.html',
     guideLabel: '간식 끊기 안내',
     testHref: 'test-food.html',
@@ -197,15 +265,29 @@ const HABITS = {
     testTitle: '식습관 성향 테스트',
     testSub: '눈앞의 햄버거, 나는 어떻게 하나',
     fields: [
-      { key: 'timesPerDay', label: '하루 몇 번', type: 'number', min: 0.5, max: 20, step: 0.5, def: 2, inputmode: 'decimal' },
-      { key: 'costPerSnack', label: '한 번 금액 (원)', type: 'number', min: 0, step: 100, def: 2500, inputmode: 'numeric' },
+      { key: 'kind', label: '주로 먹던 간식', type: 'select', def: 'store', options: [
+        { v: 'store', label: '편의점 과자·음료 — 약 350kcal / 4,000원' },
+        { v: 'drink', label: '달달한 카페 음료 — 약 450kcal / 6,000원' },
+        { v: 'dessert', label: '카페 음료 + 디저트 — 약 650kcal / 12,000원' },
+      ], note: '체지방은 7,700kcal를 1kg으로 본 환산값이에요. 실제 체중 변화는 전체 식사량과 활동량에 따라 달라집니다.' },
+      { key: 'timesPerDay', label: '하루 평균 몇 번', type: 'number', min: 0.5, max: 10, step: 0.5, def: 1, inputmode: 'decimal',
+        note: '매일은 아니었다면 일주일 횟수를 7로 나눠 넣으세요. 주 3~4번이면 0.5입니다.' },
     ],
-    perDay: (num) => ({
-      money: num('timesPerDay', 2) * num('costPerSnack', 2500),
-      count: num('timesPerDay', 2),
-    }),
-    countText: (n) => comma(Math.round(n)) + '번',
-    celebrateText: (n) => `간식 ${comma(Math.round(n))}번을 참았어요.`,
+    perDay: (num, get) => {
+      const t = SNACK_KINDS[get('kind')] || SNACK_KINDS.store;
+      const c = num('timesPerDay', 1);
+      return { kcal: t.kcal * c, money: t.won * c, count: t.kcal * c };
+    },
+    mainText: (kcal) => fatKg(kcal) + ' kg',
+    mainShort: (kcal) => fatKg(kcal) + 'kg',
+    countText: (n) => comma(Math.round((n / KCAL_PER_10K_STEPS) * 10000)) + '보',
+    subText: (day, p) => '누적 ' + comma(day * p.kcal) + ' kcal',
+    extraText: (day, p) => {
+      const won = day * p.money;
+      const reward = snackReward(won);
+      return '아낀 돈 <strong>' + comma(won) + '원</strong>' + (reward ? ' · ' + reward : '');
+    },
+    celebrateText: (n) => `체지방으로 치면 약 ${fatKg(n)}kg 분량을 막았어요.`,
   },
 
   reels: {

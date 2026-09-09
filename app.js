@@ -49,6 +49,17 @@ function migrateOldKeys() {
   }
 }
 
+// 밀가루 카운터가 칼로리 기준으로 바뀌면서 입력 항목이 달라졌다.
+// 예전에 쓰던 '일주일 몇 끼'가 있으면 '하루 몇 번'으로 옮겨준다.
+// (간식은 timesPerDay 를 예전에도 썼으므로 그대로 이어진다.)
+function migrateFlourKeys() {
+  if (readStore('qs.flour.timesPerDay') !== null) return;
+  const perWeek = Number(readStore('qs.flour.mealsPerWeek'));
+  if (perWeek > 0) {
+    writeStore('qs.flour.timesPerDay', String(Math.max(0.5, Math.round((perWeek / 7) * 2) / 2)));
+  }
+}
+
 // ===== 날짜 계산 =====
 
 // 시분초를 버린 '날짜만'의 밀리초 값
@@ -129,23 +140,40 @@ function perDay() {
 }
 
 function isTime() { return H().metric === 'time'; }
+function isKcal() { return H().metric === 'kcal'; }
 
-// 하루 단위의 본체 값 (원 또는 분)
+// 큰 수의 칼로리를 좁은 칸에 넣을 때 (12,000 → "12천")
+function shortKcal(kcal) {
+  const v = Math.round(kcal);
+  if (v >= 10000) return comma(Math.round(v / 1000)) + '천';
+  return comma(v);
+}
+
+// 하루 단위의 본체 값 (원, 분 또는 kcal)
 function unitPerDay() {
   const p = perDay();
+  if (isKcal()) return p.kcal || 0;
   return isTime() ? (p.minutes || 0) : (p.money || 0);
 }
 
+// 습관이 mainText 를 갖고 있으면 그것으로 표기한다 (간식: 칼로리를 체지방 kg 으로)
 function fmtMain(total) {
+  const h = H();
+  if (h.mainText) return h.mainText(total);
+  if (isKcal()) return comma(total) + ' kcal';
   return isTime() ? fmtMinutes(total) : comma(total) + '원';
 }
 
 function fmtMainShort(total) {
+  const h = H();
+  if (h.mainShort) return h.mainShort(total);
+  if (isKcal()) return shortKcal(total);
   return isTime() ? shortMinutes(total) : shortWon(total);
 }
 
 function mainLabel() {
   const h = H();
+  if (isKcal()) return h.kcalLabel || '방어한 칼로리';
   if (isTime()) return h.timeLabel || '되찾은 시간';
   return h.moneyLabel || '아낀 돈';
 }
@@ -294,10 +322,86 @@ function render() {
     ? `시작 ${start.getFullYear()}.${start.getMonth() + 1}.${start.getDate()}`
     : '시작일 미설정';
 
+  renderExtras(shown, p);
   renderSnowball();
   renderInsight();
   renderHero();
   renderHub();
+}
+
+// ===== 습관별 추가 표시 =====
+// subText / extraText / showMilestone 를 가진 습관에서만 나타난다.
+// 그 외의 습관에서는 전부 숨기므로 화면이 예전 그대로다.
+
+const MILESTONES = [
+  { label: '1주', days: 7 },
+  { label: '1개월', days: 30 },
+  { label: '6개월', days: 180 },
+];
+
+function renderExtras(day, p) {
+  const h = H();
+  const on = day > 0 && !!getStartDate();
+
+  // 본체 숫자 아래의 작은 줄 (밀가루: 아낀 돈 / 간식: 누적 칼로리)
+  setIfPresent('savedSub', (el) => {
+    if (on && h.subText) {
+      el.textContent = h.subText(day, p);
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
+  // 통계 아래 한 줄 (밀가루: 각설탕 / 간식: 아낀 돈과 보상)
+  setIfPresent('extraLine', (el) => {
+    if (on && h.extraText) {
+      el.innerHTML = h.extraText(day, p);
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
+  renderMilestone(day);
+}
+
+function renderMilestone(day) {
+  const box = $('milestone');
+  if (!box) return;
+
+  if (!H().showMilestone || day <= 0) {
+    box.classList.add('hidden');
+    return;
+  }
+  box.classList.remove('hidden');
+  box.textContent = '';
+
+  for (const m of MILESTONES) {
+    const ratio = Math.min(day / m.days, 1);
+
+    const row = document.createElement('div');
+    row.className = 'ms-row' + (ratio >= 1 ? ' done' : '');
+
+    const label = document.createElement('span');
+    label.className = 'ms-label';
+    label.textContent = m.label;
+
+    const bar = document.createElement('span');
+    bar.className = 'ms-bar';
+    const fill = document.createElement('i');
+    fill.style.width = (ratio * 100).toFixed(1) + '%';
+    bar.appendChild(fill);
+
+    const pct = document.createElement('span');
+    pct.className = 'ms-pct';
+    pct.textContent = ratio >= 1 ? '달성' : Math.floor(ratio * 100) + '%';
+
+    row.appendChild(label);
+    row.appendChild(bar);
+    row.appendChild(pct);
+    box.appendChild(row);
+  }
 }
 
 // ===== 이대로 가면 얼마가 모이는지 =====
@@ -329,6 +433,13 @@ function renderSnowball() {
 
   const start = getStartDate();
   const unit = unitPerDay();
+
+  // 마일스톤 게이지를 쓰는 습관은 그쪽이 같은 자리를 대신한다
+  if (H().showMilestone) {
+    renderSnowNext.next = null;
+    box.classList.add('hidden');
+    return;
+  }
 
   if (!start || !(unit > 0)) {
     box.classList.add('hidden');
@@ -738,18 +849,30 @@ function buildFields(container, prefix) {
     label.className = 'field';
     label.innerHTML = `<span>${f.label}</span>`;
 
-    const input = document.createElement('input');
-    input.id = fieldId(prefix, f.key);
-    input.type = f.type === 'time' ? 'time' : 'number';
-    if (f.type !== 'time') {
-      if (f.min !== undefined) input.min = String(f.min);
-      if (f.max !== undefined) input.max = String(f.max);
-      if (f.step !== undefined) input.step = String(f.step);
-      if (f.inputmode) input.inputMode = f.inputmode;
+    let input;
+    if (f.type === 'select') {
+      input = document.createElement('select');
+      for (const o of f.options || []) {
+        const opt = document.createElement('option');
+        opt.value = o.v;
+        opt.textContent = o.label;
+        input.appendChild(opt);
+      }
+    } else {
+      input = document.createElement('input');
+      input.type = f.type === 'time' ? 'time' : 'number';
+      if (f.type !== 'time') {
+        if (f.min !== undefined) input.min = String(f.min);
+        if (f.max !== undefined) input.max = String(f.max);
+        if (f.step !== undefined) input.step = String(f.step);
+        if (f.inputmode) input.inputMode = f.inputmode;
+      }
     }
+    input.id = fieldId(prefix, f.key);
     label.appendChild(input);
 
-    if (fields.length === 2 && !f.note) {
+    // 고르는 칸은 넓어야 하므로 두 칸 나란히 배치에서 뺀다
+    if (fields.length === 2 && !f.note && f.type !== 'select') {
       if (!row) { row = document.createElement('div'); row.className = 'field-row'; container.appendChild(row); }
       row.appendChild(label);
     } else {
@@ -779,7 +902,9 @@ function saveFields(prefix) {
   for (const f of H().fields || []) {
     const el = $(fieldId(prefix, f.key));
     if (!el) continue;
-    if (f.type === 'time') {
+    if (f.type === 'select') {
+      set(f.key, el.value);
+    } else if (f.type === 'time') {
       if (!/^\d{1,2}:\d{2}$/.test(el.value)) { el.focus(); return false; }
       set(f.key, el.value);
     } else {
@@ -1022,6 +1147,7 @@ setIfPresent('bannerClose', (el) => el.addEventListener('click', () => {
 // ===== 시작 =====
 
 migrateOldKeys();
+migrateFlourKeys();
 initInstallBanner();
 
 // 주소에 ?h=coffee 처럼 습관이 적혀 있으면 그걸 먼저 연다

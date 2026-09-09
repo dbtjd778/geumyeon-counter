@@ -553,6 +553,47 @@ body.app.web .widget {
 .snow-next strong { color: var(--pine-deep); font-weight: 700; }
 
 /* 담배 전용 인사이트 */
+/* 칼로리로 세는 습관(밀가루·간식)에서만 쓰는 보조 표시 */
+.stat-sub { margin-top: 3px; font-size: 11px; line-height: 1.3; color: var(--faint); }
+
+.extra-line {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  text-align: center;
+}
+.extra-line strong { color: var(--pine-deep); font-weight: 700; }
+
+.milestone { display: grid; gap: 5px; }
+
+.ms-row { display: flex; align-items: center; gap: 8px; }
+.ms-label { flex: 0 0 36px; font-size: 11px; color: var(--muted); }
+.ms-pct { flex: 0 0 34px; font-size: 11px; color: var(--muted); text-align: right; }
+
+.ms-bar {
+  flex: 1;
+  height: 6px;
+  min-width: 0;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.ms-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pine);
+  transition: width 0.4s ease;
+}
+
+.ms-row.done .ms-bar i { background: var(--gold); }
+.ms-row.done .ms-pct { color: var(--pine-deep); font-weight: 700; }
+
 .insight {
   background: var(--paper);
   border: 1px solid var(--line);
@@ -887,6 +928,20 @@ body.app.web .home-content {
 }
 
 .field input:focus { outline: none; border-color: var(--pine); box-shadow: 0 0 0 3px var(--pine-soft); }
+
+.field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  color-scheme: light;
+}
+
+.field select:focus { outline: none; border-color: var(--pine); box-shadow: 0 0 0 3px var(--pine-soft); }
 
 .field-row { display: flex; gap: 10px; }
 .field-row .field { flex: 1; min-width: 0; }

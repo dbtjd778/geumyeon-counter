@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20260905d">
+<link rel="stylesheet" href="style.css?v=20260909a">
 <link rel="canonical" href="https://todayquit.com/">
 <!-- 네이버 서치어드바이저 사이트 소유 확인 (지우면 소유확인이 풀린다) -->
 <meta name="naver-site-verification" content="3288d9054a2f2809c566e74cf14be89304efa40a" />
@@ -121,12 +121,17 @@
       <div class="stat">
         <div id="mainLabel" class="stat-label">아낀 돈</div>
         <div id="saved" class="stat-value">0원</div>
+        <div id="savedSub" class="stat-sub hidden"></div>
       </div>
       <div class="stat">
         <div id="countLabel" class="stat-label">안 피운 담배</div>
         <div id="notSmoked" class="stat-value">0개비</div>
       </div>
     </section>
+
+    <!-- 칼로리로 세는 습관에서만 나오는 줄과 게이지 -->
+    <p id="extraLine" class="extra-line hidden"></p>
+    <section id="milestone" class="milestone hidden"></section>
 
     <!-- 이대로 가면 얼마가 모이는지 -->
     <section id="snowball" class="snowball hidden">
@@ -421,8 +426,8 @@
   </div>
 </div>
 
-<script src="config.js?v=20260905d"></script>
-<script src="habits.js?v=20260905d"></script>
-<script src="app.js?v=20260905d"></script>
+<script src="config.js?v=20260909a"></script>
+<script src="habits.js?v=20260909a"></script>
+<script src="app.js?v=20260909a"></script>
 </body>
 </html>
