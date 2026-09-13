@@ -317,6 +317,33 @@ const HABITS = {
     celebrateText: (n) => `영화 ${comma(Math.round(n))}편 볼 시간을 되찾았어요.`,
   },
 
+  adult: {
+    id: 'adult',
+    cat: 'life',
+    emoji: '🌱',
+    name: '야동',
+    verb: '야동 끊기',
+    startLabel: '시청을 멈춘 날',
+    failLabel: '다시 봤어요',
+    countLabel: '30분 산책으로 치면',
+    timeLabel: '아낀 시간 (추정)',
+    metric: 'time',
+    tagline: '하루 30분이면 30일에 15시간',
+    obLead: '음란물 시청을 줄이고 싶은 분을 위한 개인 기록이에요. 이전의 하루 평균 시청 시간을 넣어주세요.',
+    guideHref: 'habit-loop.html',
+    guideLabel: '습관 바꾸기 안내',
+    fields: [
+      { key: 'minutesPerDay', label: '하루 평균 시청 시간 (분)', type: 'number', min: 1, max: 1440, step: 1, def: 30, inputmode: 'numeric',
+        note: '시작일을 1일차로 세어 일수 × 입력한 시간으로 추정해요. 실제 시청 여부를 감지하거나 차단하지 않아요.' },
+    ],
+    perDay: (num) => ({
+      minutes: num('minutesPerDay', 30),
+      count: num('minutesPerDay', 30) / 30,
+    }),
+    countText: (n) => trim1(n) + '번',
+    celebrateText: (n) => `30분 산책 ${trim1(n)}번에 해당하는 시간을 아꼈어요.`,
+  },
+
   game: {
     id: 'game',
     cat: 'life',
