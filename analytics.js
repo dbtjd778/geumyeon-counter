@@ -51,8 +51,17 @@ const OPT_OUT_KEY = 'qs.noAnalytics';
 
   gtag('js', new Date());
 
-  // 테스트 결과 코드(?r=)와 습관 지정(?h=)은 통계에 남길 이유가 없어 주소에서 뺀다
+  // 홍보용 UTM만 허용한다. 결과·습관·기타 입력값은 페이지 주소에 담지 않는다.
+  const campaignUrl = new URL(location.origin + location.pathname);
+  const incoming = new URLSearchParams(location.search);
+  for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']) {
+    const value = incoming.get(key);
+    // 직접 만든 캠페인 식별자만 사용하며 이메일 등의 자유 입력은 제외한다.
+    if (value && /^[a-z0-9_-]{1,80}$/.test(value)) {
+      campaignUrl.searchParams.set(key, value);
+    }
+  }
   gtag('config', GA_ID, {
-    page_location: location.origin + location.pathname,
+    page_location: campaignUrl.href,
   });
 })();
