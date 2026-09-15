@@ -150,10 +150,10 @@ const HABITS = {
     verb: '커피 끊기',
     startLabel: '커피 끊은 날',
     failLabel: '마셨어요',
-    countLabel: '안 마신 커피',
+    countLabel: '줄인 카페인 (추정)',
     metric: 'money',
     tagline: '하루 두 잔이면 1년에 약 330만 원',
-    obLead: '카페인을 줄이려는 것이든 커피값을 아끼려는 것이든, 세는 방법은 같아요.',
+    obLead: '커피 종류, 하루 잔 수와 하루 총 지출액을 넣으면 돈과 카페인을 함께 세어요.',
     guideHref: 'quit-coffee.html',
     guideLabel: '커피 끊기 안내',
     testHref: 'test-food.html',
@@ -161,16 +161,27 @@ const HABITS = {
     testTitle: '식습관 성향 테스트',
     testSub: '눈앞의 햄버거, 나는 어떻게 하나',
     fields: [
+      { key: 'coffeeKind', label: '주로 마시던 커피', type: 'select', def: 'americano', options: [
+        { v: 'americano', label: '커피숍 아메리카노 — 1잔 약 150mg' },
+        { v: 'mix', label: '인스턴트 믹스커피 — 1스틱 약 50mg' },
+      ], note: '계산용 예시값이며 매장·용량·샷 수·제품마다 달라요. 믹스는 1스틱을 1잔으로 세어요. 기존 기록은 아메리카노 기준이니 설정에서 확인해주세요.' },
       { key: 'cupsPerDay', label: '하루 몇 잔', type: 'number', min: 0.5, max: 20, step: 0.5, def: 2, inputmode: 'decimal' },
-      { key: 'pricePerCup', label: '한 잔 가격 (원)', type: 'number', min: 0, step: 100, def: 4500, inputmode: 'numeric',
-        note: '집에서 내려 마시던 커피라면 0원으로 두고 잔 수만 세어도 돼요.' },
+      { key: 'spendPerDay', label: '하루 커피에 쓰던 총액 (원)', type: 'number', min: 0, step: 100, def: 9000, inputmode: 'numeric',
+        note: '한 잔 가격이 아닌 하루 총액이에요. 무료로 마셨다면 0원도 가능해요. 종류를 바꿔도 금액은 직접 입력한 값을 유지해요.' },
     ],
-    perDay: (num) => ({
-      money: num('cupsPerDay', 2) * num('pricePerCup', 4500),
-      count: num('cupsPerDay', 2),
-    }),
-    countText: (n) => comma(Math.round(n)) + '잔',
-    celebrateText: (n) => `커피 ${comma(Math.round(n))}잔을 안 마셨어요.`,
+    perDay: (num, get) => {
+      const raw = get('spendPerDay');
+      const spend = Number(raw);
+      const cups = num('cupsPerDay', 2);
+      return {
+        money: raw !== null && raw !== '' && Number.isFinite(spend) && spend >= 0 ? spend : 9000,
+        count: cups * (get('coffeeKind') === 'mix' ? 50 : 150),
+        cups,
+      };
+    },
+    countText: (n) => comma(Math.round(n)) + ' mg',
+    extraText: (day, p) => `안 마신 커피 <strong>${trim1(day * p.cups)}잔</strong> · 카페인 누적 환산값`,
+    celebrateText: (n) => `커피로 섭취했을 카페인 약 ${comma(Math.round(n))}mg을 줄였어요.`,
   },
 
   soda: {

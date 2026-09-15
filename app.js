@@ -52,6 +52,17 @@ function migrateOldKeys() {
 // 밀가루 카운터가 칼로리 기준으로 바뀌면서 입력 항목이 달라졌다.
 // 예전에 쓰던 '일주일 몇 끼'가 있으면 '하루 몇 번'으로 옮겨준다.
 // (간식은 timesPerDay 를 예전에도 썼으므로 그대로 이어진다.)
+function migrateCoffeeKeys() {
+  if (readStore('qs.coffee.spendPerDay') !== null) return;
+  const raw = readStore('qs.coffee.pricePerCup');
+  if (raw === null || raw === '') return;
+  const price = Number(raw);
+  const cups = Number(readStore('qs.coffee.cupsPerDay'));
+  if (Number.isFinite(price) && price >= 0) {
+    writeStore('qs.coffee.spendPerDay', String(price * (cups > 0 ? cups : 2)));
+  }
+}
+
 function migrateFlourKeys() {
   if (readStore('qs.flour.timesPerDay') !== null) return;
   const perWeek = Number(readStore('qs.flour.mealsPerWeek'));
@@ -1147,6 +1158,7 @@ setIfPresent('bannerClose', (el) => el.addEventListener('click', () => {
 // ===== 시작 =====
 
 migrateOldKeys();
+migrateCoffeeKeys();
 migrateFlourKeys();
 initInstallBanner();
 
