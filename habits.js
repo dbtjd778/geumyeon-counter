@@ -346,12 +346,26 @@ const HABITS = {
     fields: [
       { key: 'minutesPerDay', label: '하루 평균 시청 시간 (분)', type: 'number', min: 1, max: 1440, step: 1, def: 30, inputmode: 'numeric',
         note: '시작일을 1일차로 세어 일수 × 입력한 시간으로 추정해요. 실제 시청 여부를 감지하거나 차단하지 않아요.' },
+      { key: 'ejaculationsPerDay', label: '이전에 하루 평균 자위로 사정한 횟수 (선택)', type: 'number', min: 0, step: 0.1, def: 0, inputmode: 'decimal',
+        note: '0이면 단백질 계산을 끕니다. 매일이 아니었다면 0.5처럼 입력하세요. 시청을 멈춘 날부터 사정도 하지 않았다고 가정합니다. 자위와 야동 시청은 별개이며, 자위해도 사정하지 않았다면 횟수에 넣지 마세요. 1회 3mL × 35~55mg/mL라는 예시 계산으로, 실제 몸에 쌓이는 단백질이나 건강 이득이 아닙니다.' },
     ],
-    perDay: (num) => ({
-      minutes: num('minutesPerDay', 30),
-      count: num('minutesPerDay', 30) / 30,
-    }),
+    perDay: (num) => {
+      const raw = num('ejaculationsPerDay', 0);
+      const times = Number.isFinite(raw) && raw > 0 ? raw : 0;
+      return {
+        minutes: num('minutesPerDay', 30),
+        count: num('minutesPerDay', 30) / 30,
+        // Pilch & Mann (2006): seminal plasma 35–55 mg/mL.
+        // 3 mL is an explicit illustrative assumption, NOT a measured average.
+        proteinLow: times * 3 * 35 / 1000,
+        proteinHigh: times * 3 * 55 / 1000,
+        ejaculations: times,
+      };
+    },
     countText: (n) => trim1(n) + '번',
+    extraText: (day, p) => p.ejaculations > 0
+      ? `‘아낀’ 단백질 (가정) <strong>${(day * p.proteinLow).toFixed(3)}~${(day * p.proteinHigh).toFixed(3)} g</strong><br>사정도 안 했다는 가정 · 체내 축적량 아님 · <a href="habit-loop.html#protein">계산 근거</a>`
+      : `단백질 재미 계산은 설정에서 선택 · <a href="habit-loop.html#protein">계산 근거</a>`,
     celebrateText: (n) => `30분 산책 ${trim1(n)}번에 해당하는 시간을 아꼈어요.`,
   },
 
