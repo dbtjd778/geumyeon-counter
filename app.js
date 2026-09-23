@@ -374,44 +374,7 @@ function renderExtras(day, p) {
     }
   });
 
-  renderProteinForecast(on, p);
   renderMilestone(day);
-}
-
-function renderProteinForecast(on, p) {
-  const box = $('proteinForecast');
-  if (!box) return;
-  box.replaceChildren();
-  box.classList.toggle('hidden', !(on && H().id === 'adult' && p.ejaculations > 0));
-  if (!on || H().id !== 'adult' || !(p.ejaculations > 0)) return;
-
-  const title = document.createElement('p');
-  title.className = 'snow-next';
-  title.textContent = '계속 사정하지 않는다면 · 단백질 예상량 (가정)';
-  const row = document.createElement('div');
-  row.className = 'snow-row';
-  for (const horizon of [
-    { label: '1개월', months: 1 },
-    { label: '6개월', months: 6 },
-    { label: '1년', months: 12 },
-    { label: '6년', months: 72 },
-  ]) {
-    const days = dayNumberOf(getStartDate(), addMonths(getStartDate(), horizon.months));
-    const cell = document.createElement('div');
-    cell.className = 'snow-cell';
-    const label = document.createElement('span');
-    label.className = 'snow-label';
-    label.textContent = horizon.label;
-    const amount = document.createElement('span');
-    amount.className = 'snow-amount';
-    amount.append(`${(days * p.proteinLow).toFixed(2)}~`, document.createElement('br'), `${(days * p.proteinHigh).toFixed(2)} g`);
-    cell.append(label, amount);
-    row.appendChild(cell);
-  }
-  const note = document.createElement('p');
-  note.className = 'snow-next';
-  note.textContent = '시작일 기준 누적 환산량 · 체내 축적량 아님';
-  box.append(title, row, note);
 }
 
 function renderMilestone(day) {
