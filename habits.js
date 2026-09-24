@@ -184,6 +184,45 @@ const HABITS = {
     celebrateText: (n) => `커피로 섭취했을 카페인 약 ${comma(Math.round(n))}mg을 줄였어요.`,
   },
 
+  delivery: {
+    id: 'delivery',
+    cat: 'food',
+    emoji: '🛵',
+    name: '배달음식',
+    verb: '배달음식 끊기',
+    startLabel: '배달음식 끊은 날',
+    failLabel: '주문했어요',
+    countLabel: '줄인 주문 (추정)',
+    moneyLabel: '아낀 배달비용 (추정)',
+    metric: 'money',
+    tagline: '배달 대신 먹는 식비까지 빼고, 남는 돈을 세어요',
+    obLead: '평소 배달 횟수와 주문 금액을 넣어주세요. 대신 먹는 식사 비용을 빼고 하루 평균 절약액을 계산해요.',
+    fields: [
+      { key: 'ordersPerWeek', label: '일주일에 배달 몇 번', type: 'number', min: 0.5, max: 50, step: 0.5, def: 3, inputmode: 'decimal',
+        note: '줄이려는 주문 횟수를 넣으세요. 2주에 한 번이면 0.5예요.' },
+      { key: 'costPerOrder', label: '한 번 주문 총액 (원)', type: 'number', min: 0, step: 100, def: 25000, inputmode: 'numeric',
+        note: '배달료 포함, 할인 후 실제로 내던 금액을 넣으세요. 기본값은 계산 예시예요.' },
+      { key: 'replacementCost', label: '대신 먹는 식사 비용 (원)', type: 'number', min: 0, step: 100, def: 8000, inputmode: 'numeric',
+        note: '한 번 주문과 같은 인원·끼니 기준으로 넣으세요. 0원으로 두면 배달 주문액 전체를 계산해요.' },
+    ],
+    perDay: (num, get) => {
+      const amount = (key, fallback) => {
+        const raw = get(key);
+        const value = Number(raw);
+        return raw !== null && raw !== '' && raw !== undefined && Number.isFinite(value) && value >= 0 ? value : fallback;
+      };
+      const count = num('ordersPerWeek', 3) / 7;
+      const difference = amount('costPerOrder', 25000) - amount('replacementCost', 8000);
+      return { money: Math.max(0, difference) * count, count, difference };
+    },
+    countText: (n) => trim1(n) + '회',
+    subText: (day, p) => '하루 평균 ' + comma(p.money) + '원씩',
+    extraText: (day, p) => p.difference < 0
+      ? '대체 식비가 주문액보다 커서 절약액은 <strong>0원</strong>으로 표시해요.'
+      : '시작일을 1일차로 계산한 평균 추정액이에요. 실제 주문·저축 내역과는 달라요.',
+    celebrateText: (n) => `설정한 빈도로 환산하면 배달 주문 약 ${trim1(n)}회 분량이에요.`,
+  },
+
   soda: {
     id: 'soda',
     cat: 'food',
