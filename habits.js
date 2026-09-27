@@ -197,6 +197,8 @@ const HABITS = {
     metric: 'money',
     tagline: '배달 대신 먹는 식비까지 빼고, 남는 돈을 세어요',
     obLead: '평소 배달 횟수와 주문 금액을 넣어주세요. 대신 먹는 식사 비용을 빼고 하루 평균 절약액을 계산해요.',
+    guideHref: 'quit-delivery.html',
+    guideLabel: '배달음식 끊기 안내',
     fields: [
       { key: 'ordersPerWeek', label: '일주일에 배달 몇 번', type: 'number', min: 0.5, max: 50, step: 0.5, def: 3, inputmode: 'decimal',
         note: '줄이려는 주문 횟수를 넣으세요. 2주에 한 번이면 0.5예요.' },
