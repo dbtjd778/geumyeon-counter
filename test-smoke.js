@@ -320,7 +320,7 @@ async function shareResult() {
   // 모바일에서는 시스템 공유창(카톡·문자·인스타 등)이 뜬다
   if (navigator.share) {
     try {
-      await navigator.share({ title: '흡연 & 금연 성향 테스트', text, url });
+      await navigator.share({ title: '담배 성격 테스트', text, url });
       return;
     } catch (e) {
       if (e && e.name === 'AbortError') return;  // 사용자가 닫은 경우

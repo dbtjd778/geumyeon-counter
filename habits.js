@@ -95,7 +95,7 @@ const HABITS = {
     guideLabel: '금연 정보',
     testHref: 'test-smoke.html',
     testEmoji: '🚬',
-    testTitle: '흡연 & 금연 성향 테스트',
+    testTitle: '담배 성격 테스트',
     testSub: '나에게 맞는 금연 전략은?',
     profile: true,   // 성별·나이 입력 (평균 비교용)
     fields: [
