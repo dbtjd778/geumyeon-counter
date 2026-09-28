@@ -506,6 +506,26 @@ const HABITS = {
   },
 };
 
+// ===== 스토어 앱 버전 =====
+// 구글 플레이(TWA)·앱스토어(Capacitor) 앱으로 열면 스토어 연령 등급에 맞춰 일부 카운터를 뺀다.
+// 앱의 시작 주소에 ?app=android 또는 ?app=ios 를 붙여 둔다. 같은 탭 안에서 다른 페이지로
+// 옮겨가도 유지되도록 sessionStorage 에 기억한다. localStorage 를 쓰지 않는 이유는
+// 안드로이드 앱이 기기의 Chrome 과 저장소를 같이 써서, 브라우저로 사이트를 열 때까지
+// 숨겨지기 때문이다. (TWA 는 첫 화면에서만 document.referrer 가 android-app:// 로 온다)
+const APP_MODE = (function () {
+  const KEY = 'qs.appMode';
+  try {
+    const m = location.search.match(/[?&]app=(android|ios)(?:&|$)/);
+    let v = m ? m[1] : '';
+    if (!v && document.referrer.indexOf('android-app://') === 0) v = 'android';
+    if (!v && window.Capacitor) v = 'ios';
+    if (v) { sessionStorage.setItem(KEY, v); return v; }
+    return sessionStorage.getItem(KEY) || '';
+  } catch (e) { return ''; }
+})();
+const APP_HIDDEN_HABITS = ['adult'];
+if (APP_MODE) for (const id of APP_HIDDEN_HABITS) delete HABITS[id];
+
 // 'HH:MM' 두 개의 차이 (앞 - 뒤) 를 분으로. 08:30 - 06:30 = 120
 function minutesBetween(a, b) {
   const toMin = (t) => {
