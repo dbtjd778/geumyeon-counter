@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>데스크탑에 설치 — 투데이큇</title>
-<meta name="description" content="컴퓨터를 켤 때마다 카운터가 자동으로 뜨게 하는 방법. 설치 파일 없이 브라우저 기능으로 앱처럼 설치할 수 있습니다.">
+<meta name="description" content="컴퓨터를 켤 때마다 카운터가 자동으로 뜨게 하는 방법. 윈도우(크롬·엣지)와 맥(사파리·크롬) 모두 설치 파일 없이 브라우저 기능으로 앱처럼 설치할 수 있습니다.">
 <meta name="theme-color" content="#f4f6f3">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -15,7 +15,7 @@
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://todayquit.com/install.html">
 <meta property="og:title" content="데스크탑에 설치 — 투데이큇">
-<meta property="og:description" content="컴퓨터를 켤 때마다 카운터가 자동으로 뜨게 하는 방법. 설치 파일 없이 브라우저 기능으로 앱처럼 설치할 수 있습니다.">
+<meta property="og:description" content="컴퓨터를 켤 때마다 카운터가 자동으로 뜨게 하는 방법. 윈도우(크롬·엣지)와 맥(사파리·크롬) 모두 설치 파일 없이 브라우저 기능으로 앱처럼 설치할 수 있습니다.">
 <meta property="og:image" content="https://todayquit.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211829862421684" crossorigin="anonymous"></script>
@@ -37,11 +37,11 @@
   </header>
 
   <h1>데스크탑에 설치</h1>
-  <p class="updated">최종 수정일: 2026년 8월 7일</p>
+  <p class="updated">최종 수정일: 2026년 10월 7일</p>
 
-  <p>컴퓨터를 켤 때마다 카운터가 자동으로 뜨게 만들 수 있습니다. <strong>주소창 없는 작은 창</strong>으로 열리고, 시작 메뉴와 작업 표시줄에도 등록됩니다.</p>
+  <p>컴퓨터를 켤 때마다 카운터가 자동으로 뜨게 만들 수 있습니다. <strong>주소창 없는 작은 창</strong>으로 열리고, 윈도우는 시작 메뉴와 작업 표시줄에, 맥은 Dock과 Launchpad에 등록됩니다.</p>
 
-  <p>설치 파일을 내려받을 필요는 없습니다. 크롬과 엣지에 들어 있는 기능이라 <strong>보안 경고 없이 두 단계면 끝납니다.</strong></p>
+  <p>설치 파일을 내려받을 필요는 없습니다. 크롬, 엣지, 맥 사파리에 들어 있는 기능이라 <strong>보안 경고 없이 두 단계면 끝납니다.</strong></p>
 
   <div class="install-box">
     <button id="installBtn" class="install-btn" type="button">데스크탑 앱으로 설치</button>
@@ -63,6 +63,20 @@
     <li>오른쪽 위 <strong>… 메뉴 → 앱 → 이 사이트를 앱으로 설치</strong>를 선택합니다.</li>
   </ol>
 
+  <h3>맥 사파리 (macOS 14 소노마 이상)</h3>
+  <ol>
+    <li>사파리에서 todayquit.com 을 엽니다.</li>
+    <li>화면 맨 위 메뉴 막대에서 <strong>파일 → Dock에 추가…</strong>를 선택합니다.</li>
+    <li>이름을 확인하고 <strong>추가</strong>를 누릅니다.</li>
+  </ol>
+  <p>Dock에 아이콘이 생기고, Launchpad와 Finder의 <strong>응용 프로그램</strong> 폴더에도 들어갑니다. 메뉴에 "Dock에 추가"가 없다면 macOS가 13 이하인 경우입니다. 맥용 크롬을 쓰면 위 크롬 방법 그대로 설치할 수 있습니다.</p>
+
+  <h3>맥 바탕화면에 아이콘 두기</h3>
+  <ol>
+    <li>Finder에서 <strong>응용 프로그램</strong> 폴더를 엽니다. 안 보이면 Finder 메뉴의 <strong>이동 → 홈</strong>에서 <strong>응용 프로그램</strong> 폴더를 봅니다. 사파리로 만든 앱은 이쪽에 들어가는 경우가 많습니다.</li>
+    <li><strong>오늘만 하고 끊을게</strong> 아이콘을 <strong>⌥ Option + ⌘ Command</strong>를 누른 채로 바탕화면에 끌어다 놓습니다. 원본은 그대로 두고 바로가기(가상본)만 생깁니다.</li>
+  </ol>
+
   <h2 id="autostart">2단계 — 컴퓨터를 켤 때 자동으로 열기</h2>
 
   <p>설치만 하면 자동 실행은 아직 꺼져 있습니다. 아래에서 한 번만 켜주세요.</p>
@@ -81,22 +95,31 @@
     <li><strong>로그인할 때 시작</strong>을 켭니다.</li>
   </ol>
 
+  <h3>맥</h3>
+  <ol>
+    <li><strong>시스템 설정 → 일반 → 로그인 항목</strong>을 엽니다.</li>
+    <li><strong>로그인 시 열기</strong> 목록 아래의 <strong>+</strong> 버튼을 누릅니다.</li>
+    <li>응용 프로그램 폴더(위 바탕화면 아이콘 안내와 같은 곳)에서 <strong>오늘만 하고 끊을게</strong>를 골라 <strong>열기</strong>를 누릅니다.</li>
+  </ol>
+
   <div class="notice">
     <p>이제 컴퓨터를 켜면 카운터가 자동으로 뜹니다. 창 크기와 위치는 마지막에 두었던 대로 기억됩니다.</p>
   </div>
 
   <h2>지우고 싶을 때</h2>
 
-  <p>설치한 앱이므로 <strong>윈도우의 일반적인 앱 제거 방법</strong>으로 지웁니다.</p>
+  <p>설치한 앱이므로 <strong>윈도우나 맥의 일반적인 앱 제거 방법</strong>으로 지웁니다.</p>
 
   <ul>
     <li><strong>자동 실행만 끄기</strong> — 위 2단계에서 켰던 항목을 다시 끄면 됩니다. 앱은 그대로 남습니다.</li>
     <li><strong>앱까지 지우기</strong> — 시작 메뉴에서 <strong>오늘만 하고 끊을게</strong>를 우클릭하고 <strong>제거</strong>를 선택합니다. 또는 <strong>chrome://apps</strong> 에서 우클릭 후 <strong>Chrome에서 삭제</strong>를 고릅니다.</li>
+    <li><strong>맥에서 지우기</strong> — Dock 아이콘을 끌어내면 Dock에서만 빠지고 앱은 남습니다. 앱까지 지우려면 Finder의 응용 프로그램 폴더에서 <strong>오늘만 하고 끊을게</strong>를 휴지통으로 옮깁니다. 자동 실행을 켜뒀다면 로그인 항목에서도 <strong>−</strong>로 빼줍니다.</li>
     <li>제거해도 사이트는 그대로 남아 있으니 언제든 다시 접속할 수 있습니다.</li>
   </ul>
 
   <div class="notice">
     <p><strong>기록은 브라우저에 남습니다.</strong> 앱을 지워도 금연·금주 일수 기록은 브라우저 저장소에 그대로 있어서, 다시 설치하면 이어서 셉니다. 기록까지 지우려면 브라우저의 사이트 데이터를 삭제하세요.</p>
+    <p><strong>맥 사파리로 만든 앱은 기록이 따로입니다.</strong> 사파리 웹 앱은 사파리와 저장 공간을 나눠 쓰기 때문에, 사파리에서 쓰던 기록이 앱으로 넘어가지 않습니다. 앱에서 시작일만 다시 넣으면 일수는 그대로 계산됩니다. 반대로 이 앱을 지우면 앱 안에 있던 기록도 함께 지워질 수 있습니다.</p>
   </div>
 
   <h2>왜 설치 파일(exe)을 주지 않나</h2>
@@ -143,6 +166,10 @@
   }
 
   btn.disabled = true;
+  var ua = navigator.userAgent;
+  if (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg\//.test(ua)) {
+    state.textContent = '맥 사파리는 이 버튼 대신 메뉴 막대의 파일 → Dock에 추가로 설치합니다.';
+  }
 
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
