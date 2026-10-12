@@ -92,7 +92,7 @@
   </url>
   <url>
     <loc>https://todayquit.com/guide-drink.html</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -339,6 +339,12 @@
   <url>
     <loc>https://todayquit.com/smoking-friends.html</loc>
     <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://todayquit.com/sober-30days.html</loc>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
