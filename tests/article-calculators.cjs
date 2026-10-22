@@ -1,0 +1,15 @@
+const assert = require('node:assert/strict');
+const { caffeine, sugar } = require('../article-calculators.js');
+assert.equal(caffeine(150, 5, 5), 75);
+assert.equal(caffeine(150, 10, 5), 37.5);
+assert.ok(Math.abs(caffeine(150, 6, 5) - 65.2913) < 0.001);
+assert.equal(caffeine(0, 6, 5), 0);
+assert.equal(caffeine(150, 0, 5), 150);
+assert.ok(caffeine(150, 6, 5) < caffeine(150, 6, 6));
+assert.deepEqual(sugar(27, 250, 500, 3), { grams: 54, cubes: 18 });
+assert.deepEqual(sugar(27, 250, 125, 3), { grams: 13.5, cubes: 4.5 });
+assert.deepEqual(sugar(27, 250, 250, 4), { grams: 27, cubes: 6.75 });
+assert.deepEqual(sugar(0, 100, 500, 3), { grams: 0, cubes: 0 });
+assert.deepEqual(sugar(27, 250, 0, 3), { grams: 0, cubes: 0 });
+for (const f of [() => caffeine('', 6, 5), () => caffeine(150, -1, 5), () => caffeine(150, 6, 0), () => caffeine(Infinity, 6, 5), () => sugar(27, 0, 500, 3), () => sugar(27, 250, 500, 0), () => sugar(NaN, 250, 500, 3)]) assert.throws(f);
+console.log('PASS: caffeine half-life, fractional sugar servings, zero values and invalid input');

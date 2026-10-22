@@ -391,3 +391,9 @@
   to = "/reward.html"
   status = 301
   force = true
+
+[[redirects]]
+  from = "/habit-records"
+  to = "/habit-records.html"
+  status = 301
+  force = true

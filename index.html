@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>투데이큇 - 오늘만 하고 끊을게 | 담배·술·커피 끊기 카운터</title>
-<meta name="description" content="담배, 술, 커피, 탄산, 밀가루, 릴스·쇼츠, 게임, 택시, 욕, 늦잠. 끊고 싶은 습관을 고르면 며칠째인지와 그동안 아낀 돈, 되찾은 시간을 자동으로 세어줍니다. 가입도 설치도 필요 없습니다.">
+<title>금연·금주 카운터, 습관 일지와 줄이기 기록 | 투데이큇</title>
+<meta name="description" content="금연 일수와 절약액을 계산하고, 커피·배달·릴스 등 습관별 일지와 주간 목표를 기록하세요. 가입 없이 이용하며 기록은 현재 브라우저에 저장돼요.">
 <meta name="theme-color" content="#f4f6f3">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261022b">
+<link rel="stylesheet" href="style.css?v=20261022c">
 <link rel="canonical" href="https://todayquit.com/">
 <!-- 네이버 서치어드바이저 사이트 소유 확인 (지우면 소유확인이 풀린다) -->
 <meta name="naver-site-verification" content="3288d9054a2f2809c566e74cf14be89304efa40a" />
@@ -22,8 +22,8 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://todayquit.com/">
-<meta property="og:title" content="투데이큇 - 오늘만 하고 끊을게">
-<meta property="og:description" content="담배, 술, 커피, 릴스, 게임, 택시… 끊고 싶은 습관을 고르면 며칠째인지와 아낀 돈, 되찾은 시간을 자동으로 세어줍니다.">
+<meta property="og:title" content="금연·금주 카운터, 습관 일지와 줄이기 기록 | 투데이큇">
+<meta property="og:description" content="금연 일수와 절약액을 계산하고, 커피·배달·릴스 등 습관별 일지와 주간 목표를 기록하세요. 가입 없이 이용하며 기록은 현재 브라우저에 저장돼요.">
 <meta property="og:image" content="https://todayquit.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 <script type="application/ld+json">
@@ -31,10 +31,14 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "투데이큇",
-  "alternateName": ["오늘만 하고 끊을게", "투데이큇 - 오늘만 하고 끊을게", "todayquit"],
+  "alternateName": [
+    "오늘만 하고 끊을게",
+    "투데이큇 - 오늘만 하고 끊을게",
+    "todayquit"
+  ],
   "url": "https://todayquit.com/",
   "inLanguage": "ko",
-  "description": "끊고 싶은 습관을 고르면 며칠째인지와 그동안 아낀 돈, 되찾은 시간을 자동으로 세어주는 카운터"
+  "description": "금연 일수와 절약액을 계산하고, 커피·배달·릴스 등 습관별 일지와 주간 목표를 기록하세요. 가입 없이 이용하며 기록은 현재 브라우저에 저장돼요."
 }
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211829862421684" crossorigin="anonymous"></script>
@@ -71,13 +75,13 @@
 <!-- ===== 첫 화면: 문장 + 살아 있는 카운터 ===== -->
 <section class="hero">
   <div class="hero-copy">
-    <h1 class="hero-title"><span class="strike">오늘만</span> 하고 끊을게.</h1>
-    <p class="hero-lead">그 '오늘'이 며칠째인지 세어드립니다.</p>
-    <p class="hero-sub">담배, 술, 커피, 릴스, 게임, 택시. 끊고 싶은 습관 하나를 고르면 며칠째인지, 그동안 아낀 돈과 되찾은 시간이 저절로 쌓입니다. 가입도 앱 설치도 필요 없습니다.</p>
+    <h1 class="hero-title">금연·금주부터<br>매일의 습관 기록까지.</h1>
+    <p class="hero-lead">오늘만 하고 끊을게. 그다음 하루를 함께 기록해요.</p>
+    <p class="hero-sub">끊은 날부터 며칠째인지 세고, 오늘 어떻게 참았는지 적어보세요. 한 번에 끊기 어렵다면 주간 목표와 실제 사용량을 나란히 볼 수 있어요.</p>
     <p id="heroCount" class="hero-count hidden"></p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="#hub">끊을 습관 고르기</a>
-      <a class="btn btn-ghost" href="install.html">컴퓨터 켤 때 자동으로 뜨게</a>
+      <a class="btn btn-ghost" href="#records">일지·주간 목표 기록</a>
     </div>
     <p class="hero-note">기록은 이 브라우저에 저장돼요. 다른 기기와 동기화되지 않으며 사이트 데이터를 지우면 사라져요.</p>
   </div>
@@ -115,7 +119,7 @@
         </div>
       </div>
       <p id="nextGoal" class="next-goal"></p>
-      <button id="startCounter" class="primary start-counter" type="button">이 습관 시작하기</button>
+      <button id="startCounter" class="btn btn-primary start-counter" type="button">이 습관 시작하기</button>
     </section>
 
     <section class="stats">
@@ -250,33 +254,35 @@
     </div>
   </div>
 
-  <h2 class="section-title">읽을거리</h2>
-  <p class="section-lead">끊는 동안 도움이 되는 것만 골라 정리했습니다. 건강 관련 수치는 국가암정보센터, 질병관리청 국가건강정보포털 등 <strong>공공기관이 공개한 1차 자료</strong>를 확인하고 각 글 끝에 출처를 밝혀두었습니다.</p>
+  <section class="topic-entry" aria-labelledby="topic-title"><h2 id="topic-title">지금 궁금한 것부터 찾아보세요</h2><div class="topic-links">
+<a href="caffeine-sleep.html">카페인 지속시간 · 잔존량 계산</a><a href="sugar-drinks.html">콜라 당류 · 각설탕 개수 계산</a><a href="screen-time.html">휴대폰 사용시간 보는 법</a><a href="short-video.html">릴스·쇼츠 줄이는 방법</a><a href="withdrawal.html">금연 금단증상 기간과 대처</a><a href="cigarette-cost.html">1년 담배값 계산</a><a href="smoking-friends.html">회사 담타에서 담배 거절하기</a><a href="habit-records.html">금연 일지 · 점진적 끊기 사용법</a></div></section>
+<h2 class="section-title">습관별 읽을거리</h2>
+  <p class="section-lead">끊는 동안 도움이 되는 것만 골라 정리했습니다. 건강 정보에는 참고한 공공기관·의료기관 자료를 연결하고, 계산에는 가정과 한계를 적습니다. <a href="about.html#editorial">작성·수정 원칙</a>도 확인할 수 있어요.</p>
 
   <h3 class="list-title">금연 <a href="guide.html">전체 보기 →</a></h3>
   <div class="card-list card-grid">
     <a class="post-card" href="harms.html"><h2>담배가 몸에서 하는 일</h2><p>니코틴·타르·일산화탄소가 각각 무엇을 하는지, 주변 사람이 마시는 연기의 80%가 왜 내가 내뿜는 연기가 아닌지.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="recovery.html"><h2>끊은 순간부터 몸에서 일어나는 일</h2><p>마지막 담배 20분 뒤부터 10년 뒤까지. 며칠째에 무엇이 달라지는지 시간순으로 정리한 회복 표.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="withdrawal.html"><h2>금단증상, 언제까지 이런가</h2><p>3일째가 정점이고 2주부터 내리막입니다. 증상 목록과 대처법, 다시 피우게 되는 네 가지 상황.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="recovery.html"><h2>금연 후 몸의 변화: 시간별 변화와 회복의 개인차</h2><p>금연 후 심박수·일산화탄소·기침·질병 위험이 어떻게 달라질 수 있는지 CDC 자료로 확인해요. 카운터의 날짜를 개인 건강 진단으로 해석하지 마세요.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="withdrawal.html"><h2>금연 금단증상 언제까지? 기간과 힘든 순간 대처법</h2><p>금연 첫 주와 이후에 나타날 수 있는 금단증상, 개인차, 흡연 욕구를 넘기는 방법을 정리했어요. 일지로 상황과 대처를 기록해 보세요.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="weight.html"><h2>금연하면 살이 찌는 이유</h2><p>의지 문제가 아니라 몸에서 세 가지가 동시에 일어나기 때문입니다. 얼마나 찌는지, 그것이 계속 피울 이유가 되는지.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="ecig.html"><h2>전자담배로 바꾸면 금연이 되나</h2><p>궐련형과 액상형은 무엇이 다른지, 보건당국이 이것을 금연 방법으로 권하지 않는 네 가지 이유.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="nrt.html"><h2>니코틴 패치와 껌, 제대로 쓰는 법</h2><p>껌은 일반 껌처럼 씹으면 효과가 안 납니다. 씹었다 멈추는 방법과 흔한 실수 네 가지, 무료로 받는 법.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="clinic.html"><h2>보건소 금연클리닉, 실제로 어떻게 이용하나</h2><p>보건소·병의원·금연캠프가 각각 어떻게 다른지 표로 비교하고, 처음 방문하면 무엇을 하는지.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="pregnancy.html"><h2>임신과 담배</h2><p>연기가 태아에게 도달하는 경로와 보고된 영향. 베란다 흡연이 왜 해결책이 되지 못하는지.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="skin.html"><h2>담배와 피부</h2><p>흡연자의 얼굴이 나이보다 들어 보이는 이유. 혈류·콜라겐·표정 주름, 끊었을 때 무엇이 며칠 안에 달라지는지.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="sleep.html"><h2>금연하고 잠이 안 올 때</h2><p>불면과 선명해진 꿈은 흔한 금단증상입니다. 그리고 금연 후 커피가 갑자기 세지는 의외의 이유.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="skin.html"><h2>금연 후 얼굴·피부 변화, 언제 좋아질까요?</h2><p>흡연과 피부 노화의 관계, 금연 후 기대할 수 있는 변화와 한계를 구분해요. 며칠 안에 주름이나 피부색이 회복된다고 단정하지 않아요.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="sleep.html"><h2>금연 후 잠이 안 올 때: 불면·카페인·금연보조제 확인</h2><p>금연 중 수면 문제가 생겼다면 금단증상, 카페인, 금연보조제 사용을 함께 확인해요. 모두 같은 날짜에 회복되는 것은 아니며 심한 증상은 상담이 필요해요.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="smell.html"><h2>담배 냄새는 어디에 남나</h2><p>베란다에서 피워도 남는 3차 흡연 잔여물. 환기로 해결되지 않는 이유와 집·차를 정리하는 순서.</p><span class="post-more">읽기</span></a>
   </div>
 
   <h3 class="list-title">금주 <a href="guide-drink.html">전체 보기 →</a></h3>
   <div class="card-list card-grid">
     <a class="post-card" href="alcohol-harms.html"><h2>술이 몸에서 하는 일</h2><p>알코올은 담배와 같은 1군 발암물질입니다. 아세트알데히드가 DNA에 무엇을 하는지, "적당히"가 실제로 몇 잔인지.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="alcohol-benefits.html"><h2>술을 끊으면 달라지는 것</h2><p>알코올 지방간은 금주만으로 정상으로 돌아옵니다. 간·잠·마음·혈압, 그리고 생각보다 큰 돈 이야기.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="alcohol-benefits.html"><h2>금주 효과, 술 끊으면 달라지는 것과 주의할 점</h2><p>금주 후 간·수면·지출에서 기대할 수 있는 변화와 개인차를 정리했어요. 간 회복을 날짜로 단정하지 않고, 금단이 의심될 때 필요한 도움도 안내해요.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="alcohol-refusal.html"><h2>술자리에서 안 마시는 법</h2><p>회식은 계속 잡힙니다. 가기 전에 정해둘 것, 짧고 단호하게 거절하는 법, 어쩔 수 없이 마셔야 할 때.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="hangover.html"><h2>숙취의 정체</h2><p>숙취는 하나의 증상이 아닙니다. 아세트알데히드, 탈수, 수면 붕괴, 저혈당이 각각 무엇을 만드는지.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="alcohol-medicine.html"><h2>술과 약을 같이 먹으면</h2><p>간에서 자리를 다투고, 작용이 같은 방향으로 겹칩니다. 특히 조심해야 할 약 여덟 가지.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="solo-drinking.html"><h2>혼술이 위험해지는 지점</h2><p>혼술 자체가 문제는 아닙니다. 다만 멈춰주는 장치가 없습니다. 습관으로 굳는 다섯 단계와 확인해볼 신호.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="alcohol-weight.html"><h2>술을 끊으면 살이 빠지나</h2><p>소주 한 병이 몇 kcal인지 직접 계산해보고, 알코올을 처리하는 동안 안주가 어디로 가는지.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="alcohol-weight.html"><h2>술 끊으면 살 빠지나요? 소주 칼로리와 체중 변화</h2><p>술을 줄이면 섭취 열량을 줄일 수 있지만 감량을 보장하지는 않아요. 소주 한 병의 알코올 열량을 계산하고 식사·대체 음료·개인차를 구분해 봐요.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="flush.html"><h2>술 마시면 얼굴이 빨개지는 사람</h2><p>체질이 아니라 분해 효소가 부족하다는 신호입니다. "마시다 보면 는다"가 위험한 이유.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="exercise.html"><h2>운동하는데 술을 마신다면</h2><p>주중에 운동하고 주말에 마시면 남는 게 있을까. 근육 회복과 수면에서 정확히 무엇이 부딪히는지.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="nonalcohol.html"><h2>무알코올 맥주, 금주에 도움이 될까</h2><p>무알코올과 비알코올은 다릅니다. 라벨 읽는 법과, 도움이 되는 사람과 조심해야 할 사람.</p><span class="post-more">읽기</span></a>
@@ -285,12 +291,12 @@
   <h3 class="list-title">식습관 · 생활습관 <a href="guide-life.html">전체 보기 →</a></h3>
   <div class="card-list card-grid">
     <a class="post-card" href="habit-loop.html"><h2>습관은 왜 안 끊기나</h2><p>담배든 릴스든 야식이든 막히는 지점은 같습니다. 신호·행동·보상 고리, 의지가 매번 지는 이유, 며칠째인지 세는 것이 통하는 이유.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="caffeine-sleep.html"><h2>카페인은 몸에 얼마나 남나</h2><p>오후 3시 커피의 절반은 밤 9시에도 남아 있습니다. 반감기, 마지막 잔의 시간, 담배를 끊으면 커피가 세지는 이유.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="sugar-drinks.html"><h2>음료 한 잔에 든 설탕</h2><p>음료의 당류를 라벨에서 확인하는 방법. 음료별 각설탕 개수, 마시는 당이 먹는 당보다 나쁜 이유, 제로 음료.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="flour-craving.html"><h2>밀가루가 당기는 이유</h2><p>빵은 당기고 밥은 안 당기는 이유. 혈당이 흔들리는 방식, 먹고 두 시간 뒤 다시 배고픈 이유, 글루텐 오해.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="caffeine-sleep.html"><h2>카페인 지속시간과 반감기: 커피 마신 뒤 얼마나 남을까?</h2><p>카페인 반감기 5시간을 가정하면 150mg은 5시간 뒤 75mg, 10시간 뒤 37.5mg이 돼요. 입력값으로 잔존량을 계산하고 수면 영향의 개인차를 확인하세요.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="sugar-drinks.html"><h2>콜라 당류와 각설탕 개수: 영양성분표로 계산하는 법</h2><p>당류 27g을 각설탕 1개 3g으로 환산하면 9개예요. 제품별 당류와 마신 양을 넣어 계산하고, 총 당류와 WHO 자유당 기준의 차이도 확인하세요.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="flour-craving.html"><h2>밀가루 음식이 당기는 이유: 빵·면을 줄이기 전 볼 것</h2><p>빵이나 면이 당긴다고 혈당 문제나 중독으로 단정할 수는 없어요. 식사 간격·음식 종류·먹는 상황을 기록하고, 밀가루를 무조건 끊어야 하는지 구분해요.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="late-snack.html"><h2>야식이 당기는 밤</h2><p>밤의 배고픔은 대개 낮에 원인이 있습니다. 부실한 저녁, 부족한 잠, 힘든 하루. 주문을 20분 늦추는 법.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="screen-time.html"><h2>스크린타임 확인하고 줄이는 법</h2><p>하루 4시간이면 1년에 61일. 확인하는 경로와, 알림·앱 타이머·회색조처럼 실제로 줄여주는 설정 순서.</p><span class="post-more">읽기</span></a>
-    <a class="post-card" href="short-video.html"><h2>숏폼이 집중력에 하는 일</h2><p>5분만 보려다 한 시간이 가는 이유. 예측할 수 없는 보상, 긴 글이 안 읽히는 느낌의 정체, 되돌리는 법.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="screen-time.html"><h2>휴대폰 사용시간 보는 법: 아이폰 스크린타임·안드로이드</h2><p>아이폰 설정의 스크린 타임, 안드로이드 디지털 웰빙에서 앱별 사용 시간을 확인해요. 기록이 안 보일 때와 주간 목표를 정하는 방법도 안내해요.</p><span class="post-more">읽기</span></a>
+    <a class="post-card" href="short-video.html"><h2>릴스·쇼츠 끊는 법: 사용시간 확인부터 앱 제한까지</h2><p>릴스·쇼츠를 줄이려면 사용시간을 확인하고, 앱 타이머와 쉬는 시간을 정해 보세요. 앱 차단과 단순 알림의 차이, 매일 기록하는 방법을 안내해요.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="sleep-shift.html"><h2>잠드는 시간 앞당기기</h2><p>일찍 일어나기의 실제 내용은 일찍 자기입니다. 새벽 1시에서 밤 11시로 옮기는 3주 계획.</p><span class="post-more">읽기</span></a>
     <a class="post-card" href="small-spend.html"><h2>작은 지출이 1년이면</h2><p>커피 두 잔, 주 3회 택시, 주말 배달, 안 보는 구독. 만 원 남짓한 지출을 1년과 5년으로 계산했습니다.</p><span class="post-more">읽기</span></a>
   </div>
@@ -324,7 +330,7 @@
     </details>
     <details>
       <summary>기록이 사라졌어요</summary>
-      <p>브라우저의 인터넷 사용 기록이나 사이트 데이터를 지우면 함께 지워집니다. 다만 <strong>시작일만 다시 넣으면 일수는 그대로 복구</strong>됩니다. 계산해서 보여주는 방식이라 잃어버릴 기록 자체가 없는 셈입니다.</p>
+      <p>브라우저의 인터넷 사용 기록이나 사이트 데이터를 지우면 함께 지워집니다. 다만 <strong>시작일만 다시 넣으면 일수는 그대로 복구</strong>됩니다. 일수는 다시 계산할 수 있지만, <strong>삭제된 일지·주간 목표·실제 사용량은 시작일을 넣어도 복원되지 않습니다.</strong></p>
     </details>
     <details>
       <summary>휴대폰과 컴퓨터의 숫자가 다릅니다</summary>
