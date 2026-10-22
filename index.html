@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261022a">
+<link rel="stylesheet" href="style.css?v=20261022b">
 <link rel="canonical" href="https://todayquit.com/">
 <!-- 네이버 서치어드바이저 사이트 소유 확인 (지우면 소유확인이 풀린다) -->
 <meta name="naver-site-verification" content="3288d9054a2f2809c566e74cf14be89304efa40a" />
@@ -146,6 +146,43 @@
       <p id="insightAvg" class="insight-line hidden"></p>
       <p id="insightLife" class="insight-line hidden"></p>
       <p id="insightSource" class="insight-source hidden"></p>
+    </section>
+
+    <section id="records" class="habit-records" aria-labelledby="recordHeading">
+      <h2 id="recordHeading">매일의 기록</h2>
+      <label class="record-field">기록할 습관<select id="recordHabit"></select></label>
+      <p class="record-help">일지와 목표는 습관별로 따로 보관해요. 카운터를 다시 시작해도 남아 있어요.</p>
+      <details class="record-panel">
+        <summary>✍️ 끊기 일지 <span>오늘은 어떻게 넘겼나요?</span></summary>
+        <div class="record-panel-body">
+          <div class="record-row"><label class="record-field">일지 날짜<input id="noteDate" type="date" required></label><button id="noteToday" type="button">오늘</button></div>
+          <label class="record-field">오늘의 메모<textarea id="noteText" rows="4" maxlength="1000" placeholder="배달 앱을 켜려다가 냉장고에 있던 밥을 먹었어요. 생각보다 괜찮았어요." aria-describedby="noteStatus noteLength"></textarea></label>
+          <div class="record-row"><small id="noteLength">0 / 1,000자</small><button id="noteSave" type="button" class="primary">일지 저장</button></div>
+          <p id="noteStatus" class="record-status" role="status"></p>
+          <div class="record-row"><h3>지난 일지</h3><small id="noteHistoryCount"></small></div>
+          <div id="noteHistory"></div>
+          <button id="noteMore" type="button" hidden>지난 일지 더 보기</button>
+        </div>
+      </details>
+      <details class="record-panel">
+        <summary>🌱 점진적 끊기 <span>이번 주는 조금 덜, 내 속도로</span></summary>
+        <div class="record-panel-body">
+          <p class="record-help" id="reduceUnitHelp"></p>
+          <div class="record-week-nav"><button id="weekPrev" type="button" aria-label="이전 주">←</button><strong id="weekLabel"></strong><button id="weekNext" type="button" aria-label="다음 주">→</button></div>
+          <button id="weekToday" type="button">이번 주로</button>
+          <div class="record-inputs"><label class="record-field"><span id="reduceBaselineLabel">평소 주간량</span><input id="reduceBaseline" type="number" min="1" max="7000" step="1" required inputmode="numeric" placeholder="예: 5"></label><label class="record-field"><span id="reduceTargetLabel">이번 주 목표</span><input id="reduceTarget" type="number" min="0" max="7000" step="1" required inputmode="numeric" placeholder="예: 2"></label></div>
+          <button id="goalSave" type="button">주간 목표 저장</button>
+          <p id="goalStatus" class="record-status" role="status"></p>
+          <div class="reduce-result"><strong id="reduceSummary"></strong><progress id="reduceProgress" hidden></progress><p id="reduceResult"></p><small id="reduceCoverage"></small></div>
+          <h3>실제로 이용한 만큼 기록하기</h3>
+          <label class="record-field">이용 날짜<select id="usageDate"></select></label>
+          <label class="record-field"><span id="reduceAmountLabel">이날 실제 이용량</span><input id="reduceAmount" type="number" min="0" max="1000" step="1" inputmode="numeric" required placeholder="이용하지 않았다면 0"></label>
+          <button id="usageSave" class="primary" type="button">이용량 저장</button>
+          <p id="usageStatus" class="record-status" role="status"></p>
+          <ul id="usageHistory" class="usage-history"></ul>
+        </div>
+      </details>
+      <p class="record-help">기록은 이 브라우저에만 저장돼요. 다른 기기와 공유되지 않으며, 사이트 데이터를 지우면 사라져요.</p>
     </section>
 
     <div class="promo-stack">
@@ -433,6 +470,8 @@
 
 <script src="config.js?v=20260909a"></script>
 <script src="habits.js?v=20260928c"></script>
-<script src="app.js?v=20261022a"></script>
+<script src="habit-records-store.js?v=20261022b"></script>
+<script src="habit-records.js?v=20261022b"></script>
+<script src="app.js?v=20261022b"></script>
 </body>
 </html>

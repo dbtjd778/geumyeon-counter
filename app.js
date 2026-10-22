@@ -291,6 +291,7 @@ function applyModeLabels() {
     }
   });
 
+  if (window.HabitRecords) window.HabitRecords.setHabit(mode);
   document.body.dataset.mode = mode;
   document.body.dataset.metric = h.metric;
 
