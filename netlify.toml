@@ -343,3 +343,51 @@
   status = 301
   force = true
 
+
+[[redirects]]
+  from = "/quit-delivery"
+  to = "/quit-delivery.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/cigarette-cost"
+  to = "/cigarette-cost.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/alcohol-cost"
+  to = "/alcohol-cost.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quit-day"
+  to = "/quit-day.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/craving-5min"
+  to = "/craving-5min.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/smoking-friends"
+  to = "/smoking-friends.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/sober-30days"
+  to = "/sober-30days.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/reward"
+  to = "/reward.html"
+  status = 301
+  force = true

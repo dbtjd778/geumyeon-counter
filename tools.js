@@ -41,183 +41,63 @@ initSeg('toolTabs', (v) => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// ===== 탭 1: 숨참기 챌린지 =====
-
-const BREATH_TIERS = [
-  { max: 15,       emoji: '🚨', name: '헤비 스모커',        short: '헤비 스모커 구간',        msg: '폐가 살려달라고 부르짖는 중입니다. 지금 끊으면 8시간 만에 혈중 일산화탄소가 정상으로 돌아옵니다.' },
-  { max: 30,       emoji: '🚬', name: '라이트 스모커·운동부족', short: '라이트 스모커 구간',  msg: '계단만 올라가도 헐떡이는 상태입니다. 2~3주만 버티면 폐 기능이 30% 이상 올라옵니다.' },
-  { max: 45,       emoji: '🫁', name: '일반 비흡연자',      short: '일반 비흡연자 구간',      msg: '지극히 정상적인 현대인의 폐입니다. 지금 상태를 지키는 것만으로도 충분히 잘하고 있습니다.' },
-  { max: 60,       emoji: '🏃', name: '체력왕',            short: '체력왕 구간',            msg: '마라톤도 가능한 탄탄한 폐활량입니다. 이 상태를 유지해 주세요.' },
-  { max: 90,       emoji: '🏊', name: '프로 수영선수급',    short: '프로 수영선수 구간',      msg: '산소 탱크를 하나 더 달고 계신 것 같습니다. 대단합니다.' },
-  { max: Infinity, emoji: '🦪', name: '전설의 해녀',        short: '전설의 해녀 구간',        msg: '바다의 지배자입니다. 다만 기록 경신을 위해 무리하지는 마세요.' },
-];
-
-function tierFor(sec) {
-  return BREATH_TIERS.find((t) => sec <= t.max);
-}
-
-const BREATH_MAX = 90;                 // 게이지가 가득 차는 기준 시간
+// ===== 잠깐 쉬기: 숨을 참거나 건강 상태를 평가하지 않는다 =====
 const RING_LEN = 2 * Math.PI * 86;
-
 let breathTimer = null;
-let countdownTimer = null;
 let breathStartAt = 0;
-
 function setRing(ratio) {
-  const r = Math.min(Math.max(ratio, 0), 1);
-  const ring = $('breathRingFg');
-  ring.style.strokeDasharray = String(RING_LEN);
-  ring.style.strokeDashoffset = String(RING_LEN * (1 - r));
+  $('breathRingFg').style.strokeDasharray = String(RING_LEN);
+  $('breathRingFg').style.strokeDashoffset = String(RING_LEN * (1 - Math.min(Math.max(ratio, 0), 1)));
 }
-
 function resetBreathView() {
-  $('breathTime').textContent = '0.0';
+  $('breathTime').textContent = '60';
   $('breathUnit').textContent = '초';
-  $('breathHint').textContent = '준비되면 시작을 누르세요';
-  setRing(0);
+  $('breathHint').textContent = '숨을 참지 말고 평소처럼 편하게 쉬세요.';
   $('breathStart').classList.remove('hidden');
   $('breathStop').classList.add('hidden');
   $('breathResult').classList.add('hidden');
-}
-
-function startCountdown() {
-  $('breathResult').classList.add('hidden');
-  $('breathStart').classList.add('hidden');
-  $('breathStop').classList.add('hidden');
   setRing(0);
-
-  let n = 3;
-  $('breathUnit').textContent = '';
-  $('breathTime').textContent = String(n);
-  $('breathHint').textContent = '숨을 크게 들이쉬세요!';
-
-  countdownTimer = setInterval(() => {
-    n -= 1;
-    if (n > 0) {
-      $('breathTime').textContent = String(n);
-    } else {
-      clearInterval(countdownTimer);
-      countdownTimer = null;
-      runBreath();
-    }
-  }, 1000);
 }
-
-function runBreath() {
-  breathStartAt = Date.now();
-  $('breathUnit').textContent = '초';
-  $('breathStop').classList.remove('hidden');
-
-  breathTimer = setInterval(() => {
-    const sec = (Date.now() - breathStartAt) / 1000;
-    $('breathTime').textContent = sec.toFixed(1);
-    setRing(sec / BREATH_MAX);
-    $('breathHint').innerHTML = `현재 <strong>${tierFor(sec).short}</strong> — 힘들면 바로 멈추세요`;
-  }, 100);
-}
-
-// showResult 가 false 면 결과 없이 정리만 한다 (탭 이동 등)
 function stopBreath(showResult) {
-  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
-  if (breathTimer) { clearInterval(breathTimer); breathTimer = null; }
-
+  if (breathTimer) clearInterval(breathTimer);
+  breathTimer = null;
   if (!showResult) { resetBreathView(); return; }
-
-  const sec = (Date.now() - breathStartAt) / 1000;
-  const tier = tierFor(sec);
-
-  $('breathResultEmoji').textContent = tier.emoji;
-  $('breathResultTitle').textContent = tier.name;
-  $('breathResultTime').textContent = `${sec.toFixed(1)}초`;
-  $('breathResultMsg').textContent = tier.msg;
-
+  const seconds = Math.min(60, Math.floor((Date.now() - breathStartAt) / 1000));
+  $('breathResultEmoji').textContent = '🌿';
+  $('breathResultTitle').textContent = seconds >= 60 ? '잠깐 쉬었어요' : '여기까지 쉬었어요';
+  $('breathResultTime').textContent = seconds + '초';
+  $('breathResultMsg').textContent = '이제 다음 행동 하나를 골라보세요. 자리에서 일어나기, 물 한 잔 마시기, 하던 일로 돌아가기 중 무엇이 좋을까요?';
   $('breathResult').classList.remove('hidden');
-  $('breathStop').classList.add('hidden');
   $('breathStart').classList.add('hidden');
-  $('breathHint').textContent = '편하게 호흡하세요';
+  $('breathStop').classList.add('hidden');
+  $('breathHint').textContent = '쉬어간 시간만 기록하며 건강 상태를 판정하지 않아요.';
 }
-
-$('breathStart').addEventListener('click', startCountdown);
+$('breathStart').addEventListener('click', () => {
+  stopBreath(false);
+  breathStartAt = Date.now();
+  $('breathStart').classList.add('hidden');
+  $('breathStop').classList.remove('hidden');
+  breathTimer = setInterval(() => {
+    const elapsed = Math.min(60, (Date.now() - breathStartAt) / 1000);
+    $('breathTime').textContent = String(Math.ceil(60 - elapsed));
+    setRing(elapsed / 60);
+    if (elapsed >= 60) stopBreath(true);
+  }, 250);
+});
 $('breathStop').addEventListener('click', () => stopBreath(true));
-$('breathRetry').addEventListener('click', resetBreathView);
+$('breathRetry').addEventListener('click', () => stopBreath(false));
+resetBreathView();
 
-// ===== 탭 2: 추정 신체 나이 =====
-
-// [폐에 더할 값, 간에 더할 값] — 답변 순서대로
-const AGE_WEIGHTS = {
-  q1: [[0, 0], [3, 1], [6, 2], [10, 3]],   // 흡연량
-  q2: [[0, 0], [1, 2], [2, 5], [3, 9]],    // 음주 횟수
-  q3: [[0, 0], [0, 1], [1, 4], [2, 7]],    // 숙취 회복
-  q4: [[0, 0], [2, 0], [5, 1], [8, 2]],    // 계단
-  q5: [[-3, -3], [-1, -1], [1, 1], [3, 3]], // 운동
-  q6: [[-1, -1], [0, 0], [2, 2], [5, 1]],  // 아침 컨디션
-};
-
-for (const q of Object.keys(AGE_WEIGHTS)) initSeg(q);
-
-const RECOVERY_STEPS = [
-  { days: 1,   label: '8시간 뒤',   text: '혈중 일산화탄소가 정상으로 돌아오고 산소량이 올라갑니다.' },
-  { days: 2,   label: '2일째',      text: '말초신경이 되살아나면서 후각과 미각이 좋아집니다.' },
-  { days: 3,   label: '3일째',      text: '니코틴 금단이 정점을 지납니다. 여기가 바닥입니다.' },
-  { days: 14,  label: '14일째',     text: '금단 증상이 서서히 줄기 시작합니다.' },
-  { days: 21,  label: '21일째',     text: '혈액순환이 좋아지고 폐 기능이 30% 이상 올라옵니다.' },
-  { days: 90,  label: '90일째',     text: '기침과 호흡곤란이 눈에 띄게 줄어듭니다.' },
-  { days: 365, label: '365일째',    text: '심장마비 위험이 흡연자의 절반으로 떨어집니다.' },
-];
-
-function addDays(n) {
-  const d = new Date();
-  d.setDate(d.getDate() + n - 1);
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-}
-
-$('ageCalc').addEventListener('click', () => {
-  const real = Number($('ageReal').value);
-  if (!(real >= 15 && real <= 100)) { $('ageReal').focus(); return; }
-
-  let lung = 0;
-  let liver = 0;
-  for (const q of Object.keys(AGE_WEIGHTS)) {
-    const w = AGE_WEIGHTS[q][Number(getSeg(q))];
-    lung += w[0];
-    liver += w[1];
+// ===== 오늘의 한 문장 계획 =====
+$('planMake').addEventListener('click', () => {
+  const when = $('planWhen').value.trim();
+  const action = $('planAction').value.trim();
+  if (!when || !action) {
+    $('planResult').textContent = '상황과 대신 할 행동을 모두 적어주세요.';
+    (!when ? $('planWhen') : $('planAction')).focus();
+    return;
   }
-
-  const lungAge = Math.max(real + lung, 15);
-  const liverAge = Math.max(real + liver, 15);
-
-  $('ageResultReal').textContent = String(real);
-  $('ageLung').textContent = String(lungAge);
-  $('ageLiver').textContent = String(liverAge);
-
-  const worst = Math.max(lungAge - real, liverAge - real);
-  let msg;
-  if (worst <= 0) {
-    msg = '실제 나이보다 좋게 나왔습니다. 지금 습관을 그대로 유지하는 것이 최선입니다.';
-  } else if (worst <= 4) {
-    msg = `실제 나이보다 ${worst}살 많게 나왔습니다. 아직 크게 벌어지지 않았으니 지금이 되돌리기 가장 쉬운 시점입니다.`;
-  } else if (worst <= 9) {
-    msg = `실제 나이보다 ${worst}살 많게 나왔습니다. 오늘 끊으면 아래 일정표대로 되돌아가기 시작합니다.`;
-  } else {
-    msg = `실제 나이보다 ${worst}살 많게 나왔습니다. 숫자에 겁먹을 필요는 없습니다. 하루만 넘겨도 몸은 바로 반응합니다.`;
-  }
-  $('ageMsg').textContent = msg;
-
-  const list = $('ageDday');
-  list.textContent = '';
-  for (const step of RECOVERY_STEPS) {
-    const row = document.createElement('div');
-    row.className = 'dday-row';
-    row.innerHTML = `
-      <span class="dday-when">${step.label}</span>
-      <span class="dday-date">${addDays(step.days)}</span>
-      <span class="dday-text">${step.text}</span>
-    `;
-    list.appendChild(row);
-  }
-
-  $('ageResult').classList.remove('hidden');
-  $('ageResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('planResult').textContent = `${when}, ${action}. 오늘은 이 한 번부터 해볼게요.`;
 });
 
 // ===== 탭 2: 설탕 계산기 =====
@@ -237,7 +117,7 @@ const DRINKS = [
   { name: '직접 입력', g: null },
 ];
 const CUBE_G = 3;
-const WHO_DAY_G = 25;
+
 
 function initSugar() {
   const sel = $('sugarDrink');
@@ -258,6 +138,14 @@ function renderSugar() {
   const d = DRINKS[Number($('sugarDrink').value) || 0];
   const custom = d.g === null;
   $('sugarCustomWrap').classList.toggle('hidden', !custom);
+  const inputs = [$('sugarCount'), ...(custom ? [$('sugarCustom')] : [])];
+  const valid = inputs.every((el) => el.value !== '' && el.checkValidity());
+  $('sugarError').textContent = valid ? '' : '개수와 당류를 입력 범위에 맞게 적어주세요.';
+  if (!valid) {
+    ['sugarDayG','sugarDayCubes','sugarYearKg','sugarYearCubes'].forEach((id) => $(id).textContent = '—');
+    $('sugarVsWho').textContent = '';
+    return;
+  }
   const perOne = custom ? (Number($('sugarCustom').value) || 0) : d.g;
   const count = Number($('sugarCount').value) || 0;
   const dayG = perOne * count;
@@ -268,12 +156,7 @@ function renderSugar() {
   $('sugarYearKg').textContent = (Math.round(yearG / 100) / 10).toString();
   $('sugarYearCubes').textContent = comma(Math.round(yearG / CUBE_G));
 
-  const v = $('sugarVsWho');
-  if (dayG <= 0) { v.textContent = ''; return; }
-  const ratio = dayG / WHO_DAY_G;
-  v.innerHTML = ratio >= 1
-    ? `이 음료만으로 WHO 하루 권장 상한(약 ${WHO_DAY_G}g)의 <strong>${Math.round(ratio * 100)}%</strong>입니다. 다른 음식의 당은 세기도 전에요.`
-    : `이 음료는 WHO 하루 권장 상한(약 ${WHO_DAY_G}g)의 <strong>${Math.round(ratio * 100)}%</strong>입니다.`;
+  $('sugarVsWho').textContent = '영양성분표의 총 당류를 환산한 값이에요. 자유당만의 양이나 하루 권장량 충족 여부를 판정하지 않아요.';
 }
 
 // ===== 탭 3: 시간 계산기 =====
@@ -294,7 +177,15 @@ function initTime() {
 }
 
 function renderTime() {
-  const min = Number($('timeMin').value) || 0;
+  const input = $('timeMin');
+  const valid = input.value !== '' && input.checkValidity();
+  $('timeError').textContent = valid ? '' : '하루 시간은 0~1,440분 사이의 정수로 입력해 주세요.';
+  if (!valid) {
+    ['timeYearHours','timeYearDays','timeYearWakeDays'].forEach((id) => $(id).textContent = '—');
+    $('timeList').textContent = '';
+    return;
+  }
+  const min = Number(input.value);
   const yearHours = (min * 365) / 60;
   $('timeYearHours').textContent = comma(Math.round(yearHours));
   $('timeYearDays').textContent = comma(Math.round(yearHours / 24));

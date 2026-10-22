@@ -27,8 +27,11 @@ function get(name) { return readStore(k(name)); }
 function set(name, value) { return writeStore(k(name), value); }
 
 function getNum(name, fallback) {
-  const v = Number(get(name));
-  return v > 0 ? v : fallback;
+  const raw = get(name);
+  const v = Number(raw);
+  const field = (H().fields || []).find((f) => f.key === name);
+  const min = field && field.min !== undefined ? field.min : 0;
+  return raw !== null && raw !== '' && Number.isFinite(v) && v >= min ? v : fallback;
 }
 
 // 습관 구분이 없던 시절(qs.startDate 등)의 값을 금연 쪽으로 옮긴다.
@@ -75,14 +78,14 @@ function migrateFlourKeys() {
 
 // 시분초를 버린 '날짜만'의 밀리초 값
 function dayStamp(d) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 function parseDate(text) {
   const m = String(text || '').trim().match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})$/);
   if (!m) return null;
   const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-  return isNaN(d.getTime()) ? null : d;
+  return d.getFullYear() === Number(m[1]) && d.getMonth() === Number(m[2]) - 1 && d.getDate() === Number(m[3]) ? d : null;
 }
 
 function toInputValue(d) {
@@ -300,6 +303,8 @@ function applyModeLabels() {
 function render() {
   const day = currentDay();
   renderedDay = day;
+  $('startCounter').classList.toggle('hidden', !!getStartDate());
+  $('failBtn').disabled = !getStartDate();
 
   $('today').textContent = formatDate(new Date());
 
@@ -819,7 +824,11 @@ const particles = (function () {
 
 // ===== 오버레이 / 버튼 그룹 =====
 
-function openOverlay(id) { $(id).classList.remove('hidden'); }
+function openOverlay(id) {
+  $(id).querySelectorAll('.form-error').forEach((el) => { el.textContent = ''; });
+  $(id).querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+  $(id).classList.remove('hidden');
+}
 function closeOverlay(id) { $(id).classList.add('hidden'); }
 
 function setSeg(id, value) {
@@ -875,11 +884,12 @@ function buildFields(container, prefix) {
       if (f.type !== 'time') {
         if (f.min !== undefined) input.min = String(f.min);
         if (f.max !== undefined) input.max = String(f.max);
-        if (f.step !== undefined) input.step = String(f.step);
+        if (f.step !== undefined) input.step = f.label.includes('(원)') ? '1' : String(f.step);
         if (f.inputmode) input.inputMode = f.inputmode;
       }
     }
     input.id = fieldId(prefix, f.key);
+    input.required = true;
     label.appendChild(input);
 
     // 고르는 칸은 넓어야 하므로 두 칸 나란히 배치에서 뺀다
@@ -908,21 +918,51 @@ function fillFields(prefix, useSaved) {
   }
 }
 
-// 입력값 검사 후 저장. 문제가 있으면 그 칸에 포커스를 주고 false 를 돌려준다.
-function saveFields(prefix) {
+// 모두 검증한 뒤 한 번에 저장한다. 뒤쪽 입력이 틀려도 앞쪽 값이 바뀌지 않는다.
+function formError(prefix, el, message) {
+  $(prefix + 'Error').textContent = message;
+  if (el) { el.setAttribute('aria-invalid', 'true'); el.focus(); }
+  return null;
+}
+
+function collectFields(prefix) {
+  $(prefix + 'Error').textContent = '';
+  const values = {};
   for (const f of H().fields || []) {
     const el = $(fieldId(prefix, f.key));
     if (!el) continue;
-    if (f.type === 'select') {
-      set(f.key, el.value);
-    } else if (f.type === 'time') {
-      if (!/^\d{1,2}:\d{2}$/.test(el.value)) { el.focus(); return false; }
-      set(f.key, el.value);
-    } else {
-      const v = Number(el.value);
-      const minOk = f.min === undefined ? v >= 0 : v >= f.min;
-      if (!(el.value !== '' && !isNaN(v) && minOk)) { el.focus(); return false; }
-      set(f.key, String(v));
+    el.removeAttribute('aria-invalid');
+    if (!el.checkValidity()) {
+      return formError(prefix, el, `${f.label}: ${el.validationMessage}`);
+    }
+    values[f.key] = el.value;
+  }
+  return values;
+}
+
+function saveCounter(prefix, dateId, genderId, ageId) {
+  const d = parseDate($(dateId).value);
+  if (!d) return formError(prefix, $(dateId), '올바른 시작 날짜를 입력해 주세요.');
+  const values = collectFields(prefix);
+  if (!values) return false;
+  if (H().profile) {
+    const age = $(ageId);
+    if (!age.checkValidity()) return formError(prefix, age, '나이는 1~120 사이의 정수로 입력하거나 비워 주세요.');
+    values.gender = getSeg(genderId);
+    values.age = age.value;
+  }
+  values.startDate = toInputValue(d);
+  const before = Object.fromEntries(Object.keys(values).map((name) => [name, get(name)]));
+  for (const [name, value] of Object.entries(values)) {
+    if (!set(name, value)) {
+      // 저장공간 부족 등으로 일부만 저장되면 원래 기록으로 되돌린다.
+      for (const [oldName, oldValue] of Object.entries(before)) {
+        try {
+          if (oldValue === null) window.localStorage.removeItem(k(oldName));
+          else writeStore(k(oldName), oldValue);
+        } catch (_) { /* 저장소가 완전히 차단된 경우 안내를 유지한다. */ }
+      }
+      return formError(prefix, null, '이 브라우저에 기록을 저장하지 못했어요. 저장 공간과 사이트 데이터 허용 설정을 확인해 주세요.');
     }
   }
   return true;
@@ -953,12 +993,7 @@ function fillOnboarding() {
 }
 
 $('obSave').addEventListener('click', () => {
-  const d = parseDate($('obStart').value);
-  if (!d) { $('obStart').focus(); return; }
-  if (!saveFields('ob')) return;
-  if (H().profile) saveProfile(getSeg('obGender'), $('obAge').value);
-
-  setStartDate(d);
+  if (!saveCounter('ob', 'obStart', 'obGender', 'obAge')) return;
   closeOverlay('onboarding');
   render();
   checkMilestone();
@@ -992,12 +1027,7 @@ $('settingsBtn').addEventListener('click', () => {
 $('settingsCancel').addEventListener('click', () => closeOverlay('settings'));
 
 $('settingsSave').addEventListener('click', () => {
-  const d = parseDate($('startInput').value);
-  if (!d) { $('startInput').focus(); return; }
-  if (!saveFields('set')) return;
-  if (H().profile) saveProfile(getSeg('genderInput'), $('ageInput').value);
-
-  setStartDate(d);
+  if (!saveCounter('set', 'startInput', 'genderInput', 'ageInput')) return;
   suppressTodayCelebration();
   closeOverlay('settings');
   render();
@@ -1115,6 +1145,8 @@ $('habitBtn').addEventListener('click', (e) => {
   else closeHabitMenu();
 });
 
+$('startCounter').addEventListener('click', () => switchMode(mode));
+
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#habitMenu') && !e.target.closest('#habitBtn')) closeHabitMenu();
 });
@@ -1174,7 +1206,7 @@ render();
 
 if (getStartDate()) {
   setTimeout(checkMilestone, 600);
-} else {
+} else if (HABITS[urlHabit] || isStandalone()) {
   fillOnboarding();
   openOverlay('onboarding');
 }
