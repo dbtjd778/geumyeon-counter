@@ -126,10 +126,12 @@
     } catch (error) { $('reduceSummary').textContent = '기록 확인 필요'; $('reduceResult').textContent = error.message; $('reduceProgress').hidden = true; $('usageHistory').replaceChildren(); }
   }
   for (const h of Object.values(HABITS)) {
+    if (document.body.dataset.counterHabit && h.id !== document.body.dataset.counterHabit) continue;
     const option = document.createElement('option'); option.value = h.id; option.textContent = `${h.emoji} ${h.name}`; $('recordHabit').append(option);
   }
   function setHabit(next) {
     if (!HABITS[next]) return;
+    if (document.body.dataset.counterHabit && next !== document.body.dataset.counterHabit) return;
     keepWeekDraft(); habit = next; $('recordHabit').value = habit; limit = 10;
     $('recordHeading').textContent = `${HABITS[habit].name} · 매일의 기록`;
     renderNote(); history(); renderWeek();

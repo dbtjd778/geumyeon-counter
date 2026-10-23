@@ -5,6 +5,12 @@
   publish = "."
   command = ""
 
+# 생성용 본문 조각은 독립 문서가 아니다. 완성된 전용 카운터만 검색에 제공한다.
+[[headers]]
+  for = "/counter-content/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
 # 서비스 워커와 HTML은 캐시를 오래 물고 있으면 배포해도 새 화면이 안 보인다.
 # 매번 서버에 확인하도록 두고, 실제 캐싱은 서비스 워커가 담당한다.
 [[headers]]
@@ -395,5 +401,17 @@
 [[redirects]]
   from = "/habit-records"
   to = "/habit-records.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quit-smoking-counter"
+  to = "/quit-smoking-counter.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/sobriety-counter"
+  to = "/sobriety-counter.html"
   status = 301
   force = true

@@ -5,6 +5,9 @@
 // 바탕으로 저장하고, 계산하고, 화면을 그린다.
 
 let mode = 'smoke';
+// 전용 카운터에서는 저장된 마지막 습관보다 이 페이지의 주제를 우선한다.
+const pageHabit = document.body.dataset.counterHabit;
+const counterPages = { smoke: 'quit-smoking-counter.html', drink: 'sobriety-counter.html' };
 
 function H() { return HABITS[mode]; }
 
@@ -175,7 +178,8 @@ function fmtMain(total) {
   const h = H();
   if (h.mainText) return h.mainText(total);
   if (isKcal()) return comma(total) + ' kcal';
-  return isTime() ? fmtMinutes(total) : comma(total) + '원';
+  // 원 단위 반올림: 주간 금액을 일 단위로 나눌 때 생기는 부동소수점 오차도 보정한다.
+  return isTime() ? fmtMinutes(total) : comma(Math.round(total)) + '원';
 }
 
 function fmtMainShort(total) {
@@ -1072,6 +1076,10 @@ $('restartSave').addEventListener('click', () => {
 
 function switchMode(next) {
   if (!HABITS[next]) return;
+  if (HABITS[pageHabit] && next !== pageHabit) {
+    location.assign(counterPages[next] || `index.html?h=${next}`);
+    return;
+  }
   closeHabitMenu();
   if (next === mode) {
     // 같은 습관을 다시 눌렀는데 아직 시작 전이면 첫 설정을 다시 띄운다
@@ -1198,16 +1206,17 @@ initInstallBanner();
 // 주소에 ?h=coffee 처럼 습관이 적혀 있으면 그걸 먼저 연다
 const urlHabit = (location.search.match(/[?&]h=([a-z]+)/) || [])[1];
 const savedMode = readStore(KEY_MODE);
-if (HABITS[urlHabit]) mode = urlHabit;
+if (HABITS[pageHabit]) mode = pageHabit;
+else if (HABITS[urlHabit]) mode = urlHabit;
 else if (HABITS[savedMode]) mode = savedMode;
-if (urlHabit && HABITS[urlHabit]) writeStore(KEY_MODE, mode);
+if (HABITS[pageHabit] || HABITS[urlHabit]) writeStore(KEY_MODE, mode);
 
 applyModeLabels();
 render();
 
 if (getStartDate()) {
   setTimeout(checkMilestone, 600);
-} else if (HABITS[urlHabit] || isStandalone()) {
+} else if ((!pageHabit && HABITS[urlHabit]) || isStandalone()) {
   fillOnboarding();
   openOverlay('onboarding');
 }

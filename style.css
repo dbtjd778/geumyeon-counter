@@ -332,6 +332,15 @@ body.app:not(.web) .hero { display: contents; }
 
 .hero-note { margin-top: 14px; font-size: 12.5px; color: var(--faint); }
 
+.counter-shortcuts { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 22px 0; font-size: 14px; line-height: 1.8; }
+.counter-shortcuts a { color: var(--pine-deep); text-decoration: underline; text-underline-offset: 4px; }
+.counter-page .hero { align-items: start; }
+.counter-kicker { color: var(--pine-deep); font-size: 13px; font-weight: 700; letter-spacing: .02em; margin-bottom: 14px; }
+.counter-caution { margin-top: 22px; padding: 14px; border-left: 3px solid var(--persimmon); font-size: 13px; line-height: 1.7; background: var(--card); }
+.counter-explainer { padding-top: 12px; }
+.counter-page .record-field[hidden] { display: none; }
+#widget, #records, #calculation, #counter-questions, #prepare, #first-day, #support { scroll-margin-top: 24px; }
+
 .btn {
   display: inline-flex;
   align-items: center;

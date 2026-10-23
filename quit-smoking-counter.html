@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>금연 카운터 · 금연 일수와 절약한 담배값 계산 | 투데이큇</title>
+<meta name="description" content="금연 시작일을 넣으면 금연 며칠째인지, 안 피운 담배와 절약한 담배값을 계산해요. 금연 일지와 주간 흡연량도 기록할 수 있는 무료 웹 카운터예요.">
+<meta name="theme-color" content="#f4f6f3">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261023a">
+<link rel="canonical" href="https://todayquit.com/quit-smoking-counter.html">
+<!-- 네이버 서치어드바이저 사이트 소유 확인 (지우면 소유확인이 풀린다) -->
+<meta name="naver-site-verification" content="3288d9054a2f2809c566e74cf14be89304efa40a" />
+<meta property="og:site_name" content="투데이큇">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://todayquit.com/quit-smoking-counter.html">
+<meta property="og:title" content="금연 카운터 · 금연 일수와 절약한 담배값 계산 | 투데이큇">
+<meta property="og:description" content="금연 시작일을 넣으면 금연 며칠째인지, 안 피운 담배와 절약한 담배값을 계산해요. 금연 일지와 주간 흡연량도 기록할 수 있는 무료 웹 카운터예요.">
+<meta property="og:image" content="https://todayquit.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "투데이큇 금연 카운터",
+  "url": "https://todayquit.com/quit-smoking-counter.html",
+  "inLanguage": "ko",
+  "description": "금연 시작일을 넣으면 금연 며칠째인지, 안 피운 담배와 절약한 담배값을 계산해요. 금연 일지와 주간 흡연량도 기록할 수 있는 무료 웹 카운터예요.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript and local storage",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "KRW"
+  }
+}
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211829862421684" crossorigin="anonymous"></script>
+<script defer src="analytics.js?v=20260913b"></script>
+</head>
+<body class="app web counter-page" data-counter-habit="smoke">
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+<noscript><p class="notice">카운터 계산과 일지 저장에는 자바스크립트가 필요해요. 아래에서 계산 기준과 이용 방법을 읽을 수 있어요.</p></noscript>
+
+<!-- ===== 사이트 상단 (브라우저로 열었을 때만) ===== -->
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="site-brand" href="index.html"><span class="site-mark">◐</span>오늘만 하고 끊을게</a>
+    <nav class="site-nav">
+      <a href="index.html">전체 습관</a>
+      <a href="guide.html">금연 정보</a>
+      <a href="guide-drink.html">금주 정보</a>
+      <a href="test.html">테스트</a>
+      <a href="tools.html">도구</a>
+      <a href="about.html">소개</a>
+    </nav>
+    <a class="site-cta" href="install.html">컴퓨터에 설치</a>
+  </div>
+</header>
+
+<!-- ===== 첫 화면: 문장 + 살아 있는 카운터 ===== -->
+<section class="hero">
+  <div class="hero-copy">
+    <p class="counter-kicker">가입 없이 쓰는 무료 웹 도구</p>
+    <h1 class="hero-title">금연 카운터</h1>
+    <p class="hero-lead">담배를 안 피운 하루를, 눈에 보이게.</p>
+    <p class="hero-sub">금연 시작일과 평소 흡연량을 입력하세요. 며칠째인지 세고, 담배값을 얼마나 덜 썼을지 계산해요. 오늘 참기 어려웠던 순간도 일지에 남길 수 있어요.</p>
+    <div class="hero-actions"><a class="btn btn-primary" href="#widget">금연 카운터 시작하기</a><a class="btn btn-ghost" href="guide.html">금연하기 · 처음 시작하는 방법</a></div>
+    <p class="hero-note">가입 없이 이 브라우저에 저장해요. 기존 기록이 있다면 그대로 이어져요.</p>
+    
+    <nav class="counter-shortcuts" aria-label="카운터 바로가기"><a href="#calculation">계산 기준</a><a href="#records">일지 쓰기</a><a href="#counter-questions">자주 묻는 질문</a></nav>
+  </div>
+
+  <!-- 카운터 본체. 설치된 앱 창에서는 이것만 보인다. -->
+  <main aria-label="금연 카운터 계산 및 기록" id="widget" class="widget">
+    <header class="top">
+      <button id="habitBtn" class="habit-btn" type="button" aria-haspopup="true" aria-expanded="false" title="다른 습관 세기">
+        <span id="habitEmoji" class="habit-emoji">🚬</span>
+        <span id="habitName" class="habit-name">담배</span>
+        <span class="habit-caret" aria-hidden="true">▾</span>
+      </button>
+      <div id="habitMenu" class="habit-menu hidden" role="menu"></div>
+      <span class="top-right">
+        <span id="today"></span>
+        <button id="settingsBtn" class="icon-btn" type="button" title="설정">설정</button>
+      </span>
+    </header>
+
+    <section class="counter">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1e6b4b" />
+              <stop offset="100%" stop-color="#3ba776" />
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="100" cy="100" r="88" />
+          <circle id="ringFg" class="ring-fg" cx="100" cy="100" r="88" />
+        </svg>
+        <div class="ring-center">
+          <div id="dayNum" class="day-num">0</div>
+          <div class="day-unit">일째</div>
+        </div>
+      </div>
+      <p id="nextGoal" class="next-goal"></p>
+      <button id="startCounter" class="btn btn-primary start-counter" type="button">금연 카운터 설정하기</button>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div id="mainLabel" class="stat-label">아낀 돈</div>
+        <div id="saved" class="stat-value">0원</div>
+        <div id="savedSub" class="stat-sub hidden"></div>
+      </div>
+      <div class="stat">
+        <div id="countLabel" class="stat-label">안 피운 담배</div>
+        <div id="notSmoked" class="stat-value">0개비</div>
+      </div>
+    </section>
+
+    <p class="estimate-note">입력한 평소 사용량으로 계산한 추정치예요. 시작일은 1일째로 세어요. <a href="about.html#calculation">계산 기준</a></p>
+
+    <!-- 칼로리로 세는 습관에서만 나오는 줄과 게이지 -->
+    <p id="extraLine" class="extra-line hidden"></p>
+    <section id="milestone" class="milestone hidden"></section>
+
+    <!-- 이대로 가면 얼마가 모이는지 -->
+    <section id="snowball" class="snowball hidden">
+      <div id="snowRow" class="snow-row"></div>
+      <p id="snowNext" class="snow-next"></p>
+    </section>
+
+    <section id="insight" class="insight hidden">
+      <p id="insightAvg" class="insight-line hidden"></p>
+      <p id="insightLife" class="insight-line hidden"></p>
+      <p id="insightSource" class="insight-source hidden"></p>
+    </section>
+
+    <section id="records" class="habit-records" aria-labelledby="recordHeading">
+      <h2 id="recordHeading">매일의 기록</h2>
+      <label class="record-field" hidden>기록할 습관<select id="recordHabit"></select></label>
+      <p class="record-help">일지와 목표는 습관별로 따로 보관해요. 카운터를 다시 시작해도 남아 있어요.</p>
+      <details class="record-panel">
+        <summary>✍️ 끊기 일지 <span>오늘은 어떻게 넘겼나요?</span></summary>
+        <div class="record-panel-body">
+          <div class="record-row"><label class="record-field">일지 날짜<input id="noteDate" type="date" required></label><button id="noteToday" type="button">오늘</button></div>
+          <label class="record-field">오늘의 메모<textarea id="noteText" rows="4" maxlength="1000" placeholder="점심 뒤 담배가 생각나서 건물 밖 대신 계단을 걸었어요." aria-describedby="noteStatus noteLength"></textarea></label>
+          <div class="record-row"><small id="noteLength">0 / 1,000자</small><button id="noteSave" type="button" class="primary">일지 저장</button></div>
+          <p id="noteStatus" class="record-status" role="status"></p>
+          <div class="record-row"><h3>지난 일지</h3><small id="noteHistoryCount"></small></div>
+          <div id="noteHistory"></div>
+          <button id="noteMore" type="button" hidden>지난 일지 더 보기</button>
+        </div>
+      </details>
+      <details class="record-panel">
+        <summary>🌱 점진적 끊기 <span>이번 주는 조금 덜, 내 속도로</span></summary>
+        <div class="record-panel-body">
+          <p class="record-help" id="reduceUnitHelp"></p>
+          <div class="record-week-nav"><button id="weekPrev" type="button" aria-label="이전 주">←</button><strong id="weekLabel"></strong><button id="weekNext" type="button" aria-label="다음 주">→</button></div>
+          <button id="weekToday" type="button">이번 주로</button>
+          <div class="record-inputs"><label class="record-field"><span id="reduceBaselineLabel">평소 주간량</span><input id="reduceBaseline" type="number" min="1" max="7000" step="1" required inputmode="numeric" placeholder="예: 5"></label><label class="record-field"><span id="reduceTargetLabel">이번 주 목표</span><input id="reduceTarget" type="number" min="0" max="7000" step="1" required inputmode="numeric" placeholder="예: 2"></label></div>
+          <button id="goalSave" type="button">주간 목표 저장</button>
+          <p id="goalStatus" class="record-status" role="status"></p>
+          <div class="reduce-result"><strong id="reduceSummary"></strong><progress id="reduceProgress" hidden></progress><p id="reduceResult"></p><small id="reduceCoverage"></small></div>
+          <h3>실제로 이용한 만큼 기록하기</h3>
+          <label class="record-field">이용 날짜<select id="usageDate"></select></label>
+          <label class="record-field"><span id="reduceAmountLabel">이날 실제 이용량</span><input id="reduceAmount" type="number" min="0" max="1000" step="1" inputmode="numeric" required placeholder="이용하지 않았다면 0"></label>
+          <button id="usageSave" class="primary" type="button">이용량 저장</button>
+          <p id="usageStatus" class="record-status" role="status"></p>
+          <ul id="usageHistory" class="usage-history"></ul>
+        </div>
+      </details>
+      <p class="record-help">기록은 이 브라우저에만 저장돼요. 다른 기기와 공유되지 않으며, 사이트 데이터를 지우면 사라져요.</p>
+    </section>
+
+<footer class="bottom">
+      <span class="bottom-left">
+        <span id="startInfo"></span>
+        <a id="guideLink" class="bottom-link" href="guide.html">금연 정보</a>
+      </span>
+      <span class="bottom-btns">
+        <a id="ghostBtn" class="ghost-btn" href="install.html">데스크탑에 설치</a>
+        <button id="failBtn" class="danger" type="button">금연 실패</button>
+      </span>
+    </footer>
+  </main>
+</section>
+
+<article class="page counter-explainer">
+<h2>금연 일수 계산기, 이렇게 사용해요</h2>
+<ol>
+  <li><strong>‘금연 카운터 설정하기’를 눌러 시작일을 넣어요.</strong> 오늘부터 시작하거나 이미 끊은 날짜를 입력할 수 있어요.</li>
+  <li><strong>하루 흡연량과 한 갑 가격을 바꿔요.</strong> 기본값은 계산 예시예요. 실제로 피우던 양을 넣어야 나에게 맞는 추정액이 나와요.</li>
+  <li><strong>같은 브라우저로 다시 열어 확인해요.</strong> 시작일이 저장돼 매일 다시 입력할 필요가 없어요. 아래 ‘끊기 일지’에는 오늘 어떻게 참았는지 적을 수 있어요.</li>
+</ol>
+
+<h2 id="calculation">금연 며칠째인지, 담배값은 어떻게 계산하나요?</h2>
+<p><strong>시작일을 포함해 1일째로 세요.</strong> 10월 1일에 시작했다면 10월 1일은 1일째, 10월 7일은 7일째예요. 휴대폰·컴퓨터의 날짜를 기준으로 하며, 마지막 흡연 후 정확히 몇 시간 지났는지를 재는 초시계는 아니에요.</p>
+<div class="notice"><p>예시: 하루 10개비, 한 갑 4,500원(20개비)이라면<br><strong>하루 2,250원 · 7일 15,750원 · 30일 67,500원</strong><br>7일째 ‘안 피운 담배’는 10 × 7 = 70개비예요.</p></div>
+<p>절약액 = 하루 흡연량 ÷ 20 × 한 갑 가격 × 표시 일수예요. 매일 같은 양을 피웠을 때와 비교한 추정치라 실제 계좌 잔액이나 구매 내역과 다를 수 있어요. 전자담배의 액상·기기 비용은 이 개비 기준 계산에 맞지 않아요. 자세한 월·연간 비교는 <a href="cigarette-cost.html">담배값 계산 방법</a>에서 볼 수 있어요.</p>
+
+<p>금액은 원 단위로 반올림해 표시해요.</p>
+<h2>숫자 옆에 ‘오늘 어떻게 넘겼는지’ 남겨요</h2>
+<p>예를 들어 “점심 뒤 흡연장 대신 한 바퀴 걸었다”처럼 한 줄만 적어도 돼요. 이 문장은 작성 예시예요. 날짜를 바꿔 지난 일지를 확인하거나 수정할 수 있고, 카운터의 시작일을 바꿔도 일지는 남아요.</p>
+<p>아직 완전히 끊기 전이라면 ‘점진적 끊기’에 평소 일주일 흡연량, 이번 주 목표, 매일 실제 개비 수를 기록할 수 있어요. <strong>주간 실제 기록과 위 카운터의 추정 절약액은 별개</strong>예요. 실제 흡연량을 입력해도 금연 시작일이나 절약액이 자동 보정되지는 않아요.</p>
+
+<h2 id="counter-questions">금연 카운터 이용 전 궁금한 점</h2>
+<h3>한 개비 피웠으면 이전 기록이 전부 사라지나요?</h3>
+<p>연속 금연 일수를 다시 세려면 카운터 아래의 다시 시작 기능으로 시작일을 바꿀 수 있어요. 기존 일지와 주간 기록은 유지돼요. 어떤 상황이 어려웠는지 적고 다음 시도를 준비해보세요.</p>
+<h3>홈 화면에서 쓰던 금연 기록과 다른가요?</h3>
+<p>같은 사이트·같은 브라우저라면 동일한 기록을 사용해요. 다른 브라우저, 시크릿 창, 다른 기기에는 자동으로 옮겨지지 않아요. 브라우저 데이터를 지우기 전에 필요한 일지를 따로 보관하세요.</p>
+<h3>카운터만 사용하면 금연에 성공하나요?</h3>
+<p>카운터는 기록 도구이며 치료나 성공을 보장하지 않아요. 시작 계획이 막막하다면 <a href="guide.html">금연하기: 시작일·흡연 욕구·도움받기</a>를 읽어보세요. <a href="withdrawal.html">금연 금단증상</a>이 힘들다면 의료진이나 금연상담사의 도움을 받을 수 있어요.</p>
+<p class="updated">제작·검수: 투데이큇 운영자 · 2026년 10월 23일<br>계산값은 위에 밝힌 가정으로 직접 계산했어요. <a href="about.html#calculation">전체 계산 기준</a> · <a href="about.html#editorial">작성 원칙</a></p>
+<p><a href="sobriety-counter.html">금주 카운터</a> · <a href="index.html">전체 습관 카운터</a></p>
+
+</article>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <div class="site-foot-brand"><span class="site-mark">◐</span>오늘만 하고 끊을게</div>
+    <nav>
+      <a href="guide.html">금연 정보</a>
+      <a href="guide-drink.html">금주 정보</a>
+      <a href="guide-life.html">생활습관 정보</a>
+      <a href="test.html">테스트</a>
+      <a href="tools.html">도구</a>
+      <a href="install.html">데스크탑 설치</a>
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="contact.html">문의</a>
+    </nav>
+    <p class="site-foot-note">개인이 운영하는 사이트입니다. 입력한 값은 브라우저 안에만 저장되며, 광고 외의 수익 모델이 없습니다.</p>
+  </div>
+</footer>
+
+<!-- ===== 첫 설정 ===== -->
+<div id="onboarding" class="overlay hidden">
+  <div class="card">
+    <h2 id="obTitle">🚬 금연</h2>
+    <p id="obLead" class="sub">딱 한 번만 설정하면, 이후로는 알아서 세어드려요.</p>
+
+    <label class="field">
+      <span id="obStartLabel">금연 시작일</span>
+      <input id="obStart" type="date">
+    </label>
+
+    <div class="only-profile">
+      <div class="field">
+        <span>성별 <em>선택</em></span>
+        <div id="obGender" class="seg" data-value="">
+          <button type="button" data-v="male">남성</button>
+          <button type="button" data-v="female">여성</button>
+        </div>
+        <p class="field-note">평균 흡연량과 비교하는 데만 써요. 고르면 아래 흡연량이 평균값으로 채워져요.</p>
+      </div>
+      <label class="field">
+        <span>나이 <em>선택</em></span>
+        <input id="obAge" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
+      </label>
+    </div>
+
+    <div id="obFields"></div>
+    <p id="obError" class="form-error" role="alert"></p>
+
+    <div class="btn-row">
+      <button id="obCancel" type="button">닫기</button>
+      <button id="obSave" class="primary" type="button">시작하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 축하 ===== -->
+<div id="celebration" class="overlay hidden">
+  <div class="card">
+    <div id="celeBadge" class="cele-badge">10일</div>
+    <h2 id="celeTitle">축하합니다!</h2>
+    <p id="celeMsg"></p>
+    <p id="celeSub" class="sub"></p>
+    <button id="celeClose" class="primary" type="button">고마워 :)</button>
+  </div>
+</div>
+
+<!-- ===== 설정 ===== -->
+<div id="settings" class="overlay hidden">
+  <div class="card">
+    <h2 id="settingsTitle">금연 설정</h2>
+
+    <label class="field">
+      <span id="startInputLabel">금연 시작일</span>
+      <input id="startInput" type="date">
+    </label>
+
+    <div class="only-profile">
+      <div class="field">
+        <span>성별 <em>선택</em></span>
+        <div id="genderInput" class="seg" data-value="">
+          <button type="button" data-v="male">남성</button>
+          <button type="button" data-v="female">여성</button>
+        </div>
+        <p class="field-note">평균 흡연량과 비교하는 데만 써요. 선택된 버튼을 다시 누르면 해제돼요.</p>
+      </div>
+      <label class="field">
+        <span>나이 <em>선택</em></span>
+        <input id="ageInput" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="예: 32">
+      </label>
+    </div>
+
+    <div id="setFields"></div>
+    <p id="setError" class="form-error" role="alert"></p>
+
+    <div class="btn-row">
+      <button id="settingsCancel" type="button">취소</button>
+      <button id="settingsSave" class="primary" type="button">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 실패 확인 ===== -->
+<div id="failConfirm" class="overlay hidden">
+  <div class="card">
+    <h2>정말 실패인가요?</h2>
+    <p id="failConfirmMsg"></p>
+    <div class="btn-row">
+      <button id="failCancel" type="button">아니요, 계속할게요</button>
+      <button id="failOk" class="danger-solid" type="button">네, 실패했어요</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 실패 뒤 재시작 ===== -->
+<div id="failRestart" class="overlay sad hidden">
+  <div class="card sad-card">
+    <div class="sad-mark">…</div>
+    <h2>괜찮아요</h2>
+    <p>한 번 넘어진 것뿐이에요. 다시 시작하는 사람이 결국 끊습니다.</p>
+    <label class="field restart-field">
+      <span>언제 다시 시작할까요?</span>
+      <input id="restartInput" type="date">
+    </label>
+    <button id="restartSave" class="primary" type="button">이 날부터 다시</button>
+  </div>
+</div>
+
+<script src="config.js?v=20260909a"></script>
+<script src="habits.js?v=20260928c"></script>
+<script src="habit-records-store.js?v=20261022b"></script>
+<script src="habit-records.js?v=20261023a"></script>
+<script src="app.js?v=20261023a"></script>
+</body>
+</html>
